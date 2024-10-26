@@ -1,0 +1,682 @@
+.tableros-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: space-between;
+  background-color: #f8f8f8;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tableros-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+  color: white;
+  padding: 10px;
+}
+
+.tableros-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.list-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  align-items: flex-start; /* Alinear los elementos en la parte superior */
+}
+
+.list {
+  position: relative;
+  background-color: #d9d9d9;
+  padding: 10px;
+  border-radius: 10px;
+  height: auto; /* Altura mínima para que solo quepa el título y el botón */
+  max-height: auto; /* Que la altura se ajuste automáticamente al contenido */
+  width: 200px; /* Altura mínima para que solo quepa el título y el botón */
+  max-width: auto; /* Que la altura se ajuste automáticamente al contenido */
+  transition: max-height 0.3s ease-in-out; /* Transición suave cuando la lista crezca */
+}
+
+.add-list {
+  display: flex;
+  flex-direction: column; /* Alinea el botón y el formulario en columna */
+  align-items: flex-start; /* Alinea los elementos a la izquierda */
+  padding: 2px 8px;
+  background-color: #e0e0e0;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: relative;
+}
+
+.add-list button {
+  font-size: 0.9rem; /* Ajusta el tamaño de la fuente */
+  color: #555; /* Color del texto */
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center; /* Alinea el ícono y el texto verticalmente */
+}
+
+.tableros-footer {
+  background: linear-gradient(90deg, #000 0%, #2d4b8b 100%);
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-size: 1.2rem;
+  position: relative;
+  width: 100%;
+  bottom: 0;
+  margin-block: 0px;
+}
+
+.user-icon {
+  background-color: transparent;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+/* Estilo para los tres puntitos */
+.options-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  top: -43px;
+  right: 10px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.options-button:hover {
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* Estilo del menú desplegable */
+.options-menu-container {
+  position: relative;
+}
+
+.options-menu {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  background-color: #ce2424;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: -1 px;
+}
+
+.options-menu button {
+  position: absolute;
+  top: 0px; /* Ajusta según tu preferencia */
+  right: -50px; /* Ajusta según tu preferencia */
+  background-color: #e71c1c;
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.options-menu button:hover {
+  background-color: #ff7f7f;
+  transform: scale(1.05);
+}
+
+.add-list {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+  width: 175px; /* Establecer un ancho fijo */
+  height: 40px; /* Establecer una altura fija */
+}
+
+.add-list hover{
+  background-color: #646464;
+}
+
+.add-list input {
+  padding: 8px;
+  margin-right: 5px;
+  border-radius: 4px;
+  border: 1px solid #646464;
+}
+
+.add-list button {
+  display: flex;
+  align-items: center;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 16px;
+  color: #555;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-list button i {
+  font-size: 18px;
+  margin-right: 10px; /* Espacio entre el ícono y el texto */
+}
+
+.add-list-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px; /* Ajusta la distancia entre el botón y el formulario */
+  margin-left: -10px; /* Ajusta la distancia entre el botón y el formulario */
+  width: 175px; /* Establecer un ancho fijo */
+  height: 150px; /* Establecer una altura fija */
+  background-color: #e0e0e0;
+  padding: 10px;
+  border-radius: 20px; /* Redondeado */
+}
+
+.add-list-form input {
+  padding: 8px;
+  border: 1px solid #9e9c9c;
+  border-radius: 15px;
+  color: black;
+  background-color: #f0f0f0;
+}
+
+.add-list-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.add-list-buttons button {
+  padding: 5px 10px; /* Reduce el padding del botón */
+  font-size: 0.8rem; /* Reduce el tamaño de la fuente */
+  border-radius: 5px; /* Ajusta el redondeo de los bordes */
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+.add-list-buttons button:first-child {
+  background: #c4c4c4;
+  color: #5b5b5b;
+  border: none;
+  border-radius: 20px; /* Ajusta el redondeo de los bordes */
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-list-buttons button:last-child {
+  color: #5b5b5b;
+  background: transparent;
+  border-radius: 20px; /* Ajusta el redondeo de los bordes */
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-list-buttons button:last-child:hover {
+  opacity: 0.8;
+  background: #AFAFAF;
+}
+
+.tablero-solapa {
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%); /* Color de fondo con degradado */
+  color: white; /* Color del texto */
+  padding: 15px 50px; /* Espaciado interno de la solapa */
+  border-radius: 0px 0px 50px 50px; /* Bordes redondeados en la parte inferior izquierda y derecha */
+  width: 200px; /* Ancho de la solapa */
+  text-align: center; /* Centrar el texto */
+  position: relative; /* Para ajustar la posición según el contenedor */
+  top: 0px; /* Ajusta la posición vertical */
+  font-size: 1.05rem; /* Tamaño de la fuente */
+  font-weight: bold; /* Negrita */
+}
+
+
+.tableros-image {
+  margin-top: 1px; /* Espacio arriba de la imagen */
+  max-width: 100%;   /* Ajusta la imagen para que no se desborde del contenedor */
+  height: auto;      /* Mantiene la proporción de la imagen */
+}
+
+.tableros-header .logo {
+  margin-right: auto; /* Esto coloca el logo a la izquierda y el resto a la derecha */
+}
+
+.tableros-header .logo-img {
+  width: 50px;
+  height: 50px;
+}
+
+.create-board-icon {
+  position: absolute;
+  top: 0px; /* Ajusta según tu preferencia */
+  left: 0px; /* Ajusta según tu preferencia */
+}
+
+.create-icon {
+  width: 125px; /* Tamaño del ícono */
+  height: auto;
+  cursor: pointer;
+}
+
+.menu-icon {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+}
+
+.no-lists {
+  justify-content: flex-start; /* Esto debería alinear todo a la izquierda cuando no hay listas */
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Espacio entre tarjetas */
+  margin-bottom: 10px;
+}
+
+.card {
+  background-color: #ebebeb;
+  padding: 8px;
+  border-radius: 15px;
+}
+
+.add-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px; /* Añadir espacio entre las tarjetas y el formulario */
+  padding: 8px 0;
+}
+
+.add-card-form input {
+  padding: 6px;
+  border: 1px solid #9e9c9c;
+  border-radius: 8px;
+}
+
+.add-card-form button {
+  background-color: #7c96b3;
+  color: white;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-card-form button:hover {
+  background-color: #4a67ab;
+}
+
+.add-card-button {
+  background: transparent;
+  color: #5b5b5b;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-card-button:hover {
+  background-color: #c4c4c4;
+}
+
+.add-card-buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 5px;
+}
+
+.add-card-buttons button {
+  padding: 5px 10px; /* Reduce el padding del botón */
+  font-size: 0.8rem; /* Reduce el tamaño de la fuente */
+  border-radius: 5px; /* Ajusta el redondeo de los bordes */
+  margin-top: 6px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-card-buttons button:first-child {
+  background: #c4c4c4;
+  color: #5b5b5b;
+  border: none;
+  border-radius: 20px; /* Ajusta el redondeo de los bordes */
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-card-buttons button:last-child {
+  color: #5b5b5b;
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 20px; /* Ajusta el redondeo de los bordes */
+}
+
+.add-card-buttons button:last-child:hover {
+  opacity: 0.8;
+  background: #AFAFAF;
+}
+
+.tarjeta-detalle-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background-color: #d9d9d9;
+  border-radius: 10px;
+  margin-top: 0px; /* Asegura que no haya margen adicional en la parte superior */
+  height: auto;
+}
+
+.tarjeta-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Alinea el contenido hacia la parte superior */
+  background-color: #d9d9d9;
+  padding: 10px 10px 5px 10px; /* Ajusta el padding para reducir el espacio debajo del título */
+  border-radius: 8px;
+  height: 10px;
+}
+
+.tarjeta-cabecera h2 {
+  margin-top: 0; /* Asegura que no haya espacio extra encima del título */
+  font-size: 1.5rem; /* Ajusta el tamaño del título si lo deseas */
+  font-weight: bold;
+  padding-top: 0; /* Asegúrate de que el h2 no tenga padding superior */
+  margin-bottom: 0px;
+} 
+
+.tarjeta-contenido {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.columna-izquierda {
+  margin-top: 0px;
+  display: flex;
+  flex-direction: column; /* Apila los elementos verticalmente */
+  flex-grow: 2;
+  gap: 10px; /* Añadir espacio entre los elementos */
+  color: #393939;
+}
+
+.columna-derecha {
+  flex-grow: 1;
+  margin-left: 10px; /* Espacio entre la columna izquierda y derecha */
+  margin-right: 75px; /* Espacio entre la columna izquierda y derecha */
+  max-width: 200px; /* Ajusta el ancho máximo de la columna derecha (Detalles) */
+  color: #393939;
+}
+
+.descripcion {
+  background-color: #d9d9d9;
+  border-radius: 10px;
+  padding: 10px;
+  width: 320px;
+  height: 95px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+.descripcion-textarea {
+  width: 300px;
+  height: auto;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #c4c4c4;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: #c4c4c4;
+  overflow: hidden; /* Ocultar el scroll por defecto */
+  resize: none; /* Evita que el usuario cambie el tamaño manualmente */
+}
+
+.subtareas {
+  background-color: #d9d9d9;
+  border-radius: 10px;
+  padding: 10px;
+  width: 320px; 
+  height: auto;
+  margin-top: 5px;
+}
+
+.detalles {
+  background-color: #c4c4c4;
+  border-radius: 10px;
+  padding: 10px;
+
+  width: 180px; 
+  height: auto;
+}
+
+.subtareas ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.subtareas li {
+  margin-bottom: 5px;
+}
+
+.detalles input { 
+  width: auto;
+  padding: 5px;
+  border: none;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border-radius: 20px;
+  background: #d9d9d9;
+  height: 20px;
+  color: #5b5b5b;
+}
+
+/* Estilo para el botón "X" de cierre del modal */
+.close-modal-button {
+  position: relative;
+  top: 0px;
+  right: -280px;
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}
+
+.detalles p {
+  width: auto;
+  padding: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 20px;
+  background-color: #d9d9d9;
+  display: block;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #333;
+  text-align: center; /* Puedes ajustar la alineación según prefieras */
+}
+
+.detalles p1 {
+  width: auto;
+  padding: 5px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  border-radius: 20px;
+  display: block;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: #5b5b5b;
+}
+
+.subtareas {
+  background-color: #d9d9d9;
+  border-radius: 10px;
+  padding: 10px;
+  width: 320px;
+  height: auto;
+  margin-top: 10px;
+}
+
+.subtareas h3 {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.subtareas ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.subtareas li {
+  background-color: #c4c4c4;
+  border-radius: 20px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subtareas li span {
+  background-color: #c4c4c4 ;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  color: #5b5b5b;
+}
+
+.add-subtarea-button {
+  color: #5b5b5b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  margin-left: 10px;
+}
+
+.add-subtarea-button:hover {
+  text-decoration: underline;
+}
+
+.subtarea-input-container {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
+
+.subtarea-input {
+  padding: 8px;
+  background: #c4c4c4;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  flex: 1; /* Ocupa el espacio disponible */
+  margin-right: 10px;
+  border-radius: 15px;
+}
+
+.crear-subtarea-button {
+  padding: 8px 16px;
+  background-color: #c4c4c4; /* Color de fondo del botón */
+  color: #5b5b5b; /* Color del texto */
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+select.input-field {
+  appearance: none; /* Para que el select tenga estilo personalizado */
+  background: #c4c4c4; /* Fondo blanco para que sea consistente con el input */
+  -webkit-appearance: none; /* Para Safari */
+  -moz-appearance: none; /* Para Firefox */
+  padding-right: 10px; /* Espacio para la flecha del select */
+  border-radius: 20px; /* Borde redondeado */
+  width: 200px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  text-align: center; /* Para centrar el texto */
+}
+
+/* Colores dinámicos según el estado */
+.input-field.pendiente {
+  background-color: #eeb15d; /* Naranja para Pendiente */
+  color: white;
+}
+
+.input-field.en-curso {
+  background-color: #5476d3; /* Azul para En Curso */
+  color: white;
+}
+
+.input-field.finalizado {
+  background-color: #5cb85c; /* Verde para Finalizado */
+  color: white;
+}
+
+/* Controlar el color del texto en el dropdown */
+.input-field option {
+  color: #5b5b5b;  /* Color del texto de las opciones */
+  background-color: #c4c4c4; /* Color del fondo de las opciones por defecto */
+}
+
+
+/* Estilos para el botón según el estado */
+.estado-boton {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  color: white;
+  font-family: inherit;
+}
+
+.estado-boton.pendiente {
+  background-color: #eeb15d; /* Naranja para Pendiente */
+  color: white;
+}
+
+.estado-boton.en_curso {
+  background-color: #5bc0de; /* Azul para En Curso */
+  color: white;
+}
+
+.estado-boton.finalizado {
+  background-color: #5cb85c; /* Verde para Finalizado */
+  color: white;
+}
+
+.etiqueta {
+  color: white;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  margin-bottom: 5px; /* Añade espacio entre la etiqueta y el nombre de la tarjeta */
+  display: flex;
+  width: auto;
+  text-align: center; /* Para centrar el texto */
+  background-size: cover; /* Asegúrate de que el gradiente cubra todo el fondo */
+}
+
+.etiqueta:hover {
+  opacity: 0.9; /* Agrega un pequeño efecto al pasar el cursor */
+}
