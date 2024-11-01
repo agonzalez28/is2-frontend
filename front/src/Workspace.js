@@ -23,10 +23,9 @@ const Workspace = ({ onLogout }) => {
     useEffect(() => {
         if (!cod_usuario) {
             navigate('/'); // Redirige si no hay usuario
+        } else {
+            fetchWorkspaces(); // Llama a la función para obtener los workspaces
         }
-        else {
-          fetchWorkspaces(); // Llama a la función para obtener los workspaces
-      }
     }, [cod_usuario, navigate]);
 
     useEffect(() => {
@@ -76,13 +75,13 @@ const Workspace = ({ onLogout }) => {
                     title: boardTitle,
                     description: boardDescription,
                     color: gradients[Math.floor(Math.random() * gradients.length)], // Asignar un color aleatorio
+                    cod_espacio: result.cod_espacio // Almacenar el cod_espacio
                 }]);
-                 console.log("Workspace creado exitosamente:", result);
-                // Almacenar cod_espacio en localStorage
-                 localStorage.setItem('cod_espacio', result.cod_espacio); // Almacena el cod_usuario
-                 console.log('cod_espacio:', result.cod_espacio)
+                console.log("Workspace creado exitosamente:", result);
+                localStorage.setItem('cod_espacio', result.cod_espacio); // Almacena el cod_espacio
+                console.log('cod_espacio:', result.cod_espacio);
 
-            setShowForm(false); // Cerrar el formulario
+                setShowForm(false); // Cerrar el formulario
             } catch (error) {
                 setErrorMessage(error.message);
             }
@@ -95,130 +94,144 @@ const Workspace = ({ onLogout }) => {
         navigate(`/menu/${title}`);
     };
 
-    const handleDeleteBoard = (index) => {
-        const newBoards = boards.filter((_, boardIndex) => boardIndex !== index);
-        setBoards(newBoards);
-        if (newBoards.length === 0) {
-            setShowForm(false);
+    // Función para manejar la eliminación del workspace
+    const handleDeleteBoard = async (cod_espacio, index) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/workspace/eliminar/${cod_espacio}/`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Error al eliminar el workspace');
+
+            const newBoards = boards.filter((_, boardIndex) => boardIndex !== index);
+            setBoards(newBoards);
+            if (newBoards.length === 0) {
+                setShowForm(false);
+            }
+            console.log("Workspace eliminado exitosamente");
+        } catch (error) {
+            setErrorMessage(error.message);
         }
     };
 
-  const fetchWorkspaces = async () => {
-    const cod_usuario = localStorage.getItem('cod_usuario'); // Obtener el código de usuario
-    try {
-        const response = await fetch(`http://localhost:8000/api/workspace/workspaces/${cod_usuario}/`);
-        if (!response.ok) throw new Error('Error al obtener los workspaces');
+    const fetchWorkspaces = async () => {
+        const cod_usuario = localStorage.getItem('cod_usuario'); // Obtener el código de usuario
+        try {
+            const response = await fetch(`http://localhost:8000/api/workspace/workspaces/${cod_usuario}/`);
+            if (!response.ok) throw new Error('Error al obtener los workspaces');
 
-        const workspaces = await response.json();
-        setBoards(workspaces.map(workspace => ({ 
-            title: workspace.nom_proyecto,
-            description: workspace.descripcion, 
-            color: gradients[Math.floor(Math.random() * gradients.length)],
-        })));
-    } catch (error) {
-        setErrorMessage(error.message);
-    }
-};
+            const workspaces = await response.json();
+            setBoards(workspaces.map(workspace => ({ 
+                title: workspace.nom_proyecto,
+                description: workspace.descripcion, 
+                color: gradients[Math.floor(Math.random() * gradients.length)],
+                cod_espacio: workspace.cod_espacio // Almacena el cod_espacio
+            })));
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
+    };
 
-  return (
-    <div className="workspace-container">
-    <header className="workspace-header">
-        <div className="create-board-icon" onClick={handleCreateBoardClick}>
-            <div className="tooltip">
-                <img src="img6_Crea_Workspace.png" alt="Crear Workspace" className="create-icon" />
-                <span className="tooltiptext">Crear un nuevo Workspace</span>
-            </div>
-        </div>
-        <h1>TaskFlow</h1>
-        <div className="user-session">
-            <i className="fas fa-user-circle"></i>
-            <button onClick={onLogout}>Cerrar Sesión</button>
-        </div>
-    </header>
-    <main className="workspace-main">
-        {errorMessage && (
-            <div className="error-message">
-                <span>{errorMessage}</span>
-                <button className="close-error" onClick={() => setErrorMessage("")}></button>
-            </div>
-        )}
-        {boards.length > 0 && (
-            <h2 className="workspace-title">Espacios de trabajo de {nombre}</h2>
-        )}- 
-        {(boards.length === 0 && !showForm) ? (
-            <div>
-                <img src="/img1.png" alt="No se encuentran Workspaces" className="workspace-image" />
-                <p>No cuentas con ningún espacio de trabajo ahora mismo :(</p>
-            </div>
-        ) : (
-            <div className="board-list">
-                {boards.map((board, index) => (
-                    <div key={index} className="board" style={{ background: board.color }} onClick={() => handleBoardClick(board.title)}>
-                        <p style={{ color: 'white' }}>{board.title}</p>
-                        <button className="delete-board-button" onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteBoard(index);
-                        }}>
-                            <i className="fas fa-times"></i>
+    return (
+        <div className="workspace-container">
+            <header className="workspace-header">
+                <div className="create-board-icon" onClick={handleCreateBoardClick}>
+                    <div className="tooltip">
+                        <img src="img6_Crea_Workspace.png" alt="Crear Workspace" className="create-icon" />
+                        <span className="tooltiptext">Crear un nuevo Workspace</span>
+                    </div>
+                </div>
+                <h1>TaskFlow</h1>
+                <div className="user-session">
+                    <i className="fas fa-user-circle"></i>
+                    <button onClick={onLogout}>Cerrar Sesión</button>
+                </div>
+            </header>
+            <main className="workspace-main">
+                {errorMessage && (
+                    <div className="error-message">
+                        <span>{errorMessage}</span>
+                        <button className="close-error" onClick={() => setErrorMessage("")}></button>
+                    </div>
+                )}
+                {boards.length > 0 && (
+                    <h2 className="workspace-title">Espacios de trabajo de {nombre}</h2>
+                )}
+                {(boards.length === 0 && !showForm) ? (
+                    <div>
+                        <img src="/img1.png" alt="No se encuentran Workspaces" className="workspace-image" />
+                        <p>No cuentas con ningún espacio de trabajo ahora mismo :(</p>
+                    </div>
+                ) : (
+                    <div className="board-list">
+                        {boards.map((board, index) => (
+                            <div key={index} className="board" style={{ background: board.color }} onClick={() => handleBoardClick(board.title)}>
+                                <p style={{ color: 'white' }}>{board.title}</p>
+                                <button className="delete-board-button" onClick={(e) => {
+                                    e.stopPropagation(); // Evitar que el clic en el botón active el evento del tablero
+                                    handleDeleteBoard(board.cod_espacio, index); // Pasar el cod_espacio y el índice
+                                }}>
+                                      <span style={{ color: 'white', fontSize: '16px' }}>✖</span> {/* Cambia el icono según tu preferencia */}
+                                </button>
+                            </div>
+                        ))}
+                        <div className="board create-new" onClick={() => setShowForm(true)}>
+                            <span>+</span>
+                        </div>
+                    </div>
+                )}
+            </main>
+            {showForm && (
+                <div className="form-modal">
+                    <div className="form-container">
+                        <div className="form-header">
+                            <i className="fas fa-arrow-left" onClick={handleCloseForm}></i>
+                            <h2>Crear Workspace</h2>
+                            <span className="close-form" onClick={handleCloseForm}>&times;</span>
+                        </div>
+                        <div className="form-image-container">
+                            <img src="img7_Tablero_Default.png" alt="Ejemplo de Tablero" />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="boardTitle">Nombre del Workspace</label>
+                            <input 
+                                type="text" 
+                                id="boardTitle" 
+                                name="boardTitle" 
+                                className="input-field" 
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') handleCreateBoard(e.target.value, document.getElementById('boardDescription').value);
+                                }}
+                            />
+                            <label htmlFor="boardDescription">Descripción</label>
+                            <input 
+                                type="text" 
+                                id="boardDescription" 
+                                name="boardDescription" 
+                                className="input-field" 
+                            />
+                            <label htmlFor="visibility">Visibilidad</label>
+                            <select
+                                id="visibility"
+                                name="visibility"
+                                className="input-field"
+                                value={visibility}
+                                onChange={(e) => setVisibility(e.target.value)}
+                            >
+                                <option value="Pública">Pública</option>
+                                <option value="Privada">Privada</option>
+                                <option value="Protegida">Protegida</option>
+                            </select>
+                        </div>
+                        <button className="create-board-button" onClick={() => handleCreateBoard(document.getElementById('boardTitle').value, document.getElementById('boardDescription').value)}>
+                            Crear
                         </button>
                     </div>
-                ))}
-                <div className="board create-new" onClick={() => setShowForm(true)}>
-                    <span>+</span>
                 </div>
-            </div>
-        )}
-    </main>
-    {showForm && (
-        <div className="form-modal">
-            <div className="form-container">
-                <div className="form-header">
-                    <i className="fas fa-arrow-left" onClick={handleCloseForm}></i>
-                    <h2>Crear Workspace</h2>
-                    <span className="close-form" onClick={handleCloseForm}>&times;</span>
-                </div>
-                <div className="form-image-container">
-                    <img src="img7_Tablero_Default.png" alt="Ejemplo de Tablero" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="boardTitle">Nombre del Workspace</label>
-                    <input 
-                        type="text" 
-                        id="boardTitle" 
-                        name="boardTitle" 
-                        className="input-field" 
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter') handleCreateBoard(e.target.value, document.getElementById('boardDescription').value);
-                        }}
-                    />
-                    <label htmlFor="boardDescription">Descripción</label>
-                    <input 
-                        type="text" 
-                        id="boardDescription" 
-                        name="boardDescription" 
-                        className="input-field" 
-                    />
-                    <label htmlFor="visibility">Visibilidad</label>
-                    <select
-                        id="visibility"
-                        name="visibility"
-                        className="input-field"
-                        value={visibility}
-                        onChange={(e) => setVisibility(e.target.value)}
-                    >
-                        <option value="Pública">Pública</option>
-                        <option value="Privada">Privada</option>
-                        <option value="Protegida">Protegida</option>
-                    </select>
-                </div>
-                <button className="create-board-button" onClick={() => handleCreateBoard(document.getElementById('boardTitle').value, document.getElementById('boardDescription').value)}>
-                    Crear
-                </button>
-            </div>
+            )}
         </div>
-    )}
-    </div>
     );
 };
+
 
 export default Workspace;
