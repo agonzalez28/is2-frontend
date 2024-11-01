@@ -22,15 +22,17 @@ const Menu = ({ onLogout }) => {
 
     const cod_usuario = localStorage.getItem('cod_usuario'); // Obtener cod_usuario desde el localStorage
     const cod_espacio = localStorage.getItem('cod_espacio'); // Obtener cod_espacio de localStorage
-
+    
     useEffect(() => {
         // Si no está autenticado, redirige a la página de inicio de sesión
         if (!cod_usuario) {
             navigate('/');
+        } else {
+          fetchBoards(); // Llama a la funcion para obtener los tableros que existan
         }
-    }, [cod_usuario, navigate]);
+    }, [cod_usuario, cod_espacio, navigate]);
 
-    // Función para obtener los tableros desde la API
+    // Función para obtener los tableros desde el backend
     const fetchBoards = async () => {
         try {
             const response = await fetch(`http://localhost:8000/api/tableros/tableros/${cod_espacio}/`);
@@ -50,9 +52,6 @@ const Menu = ({ onLogout }) => {
         }
     };
 
-    useEffect(() => {
-        fetchBoards(); // Llamar a la función para obtener los tableros
-    }, [cod_espacio]);
 
     useEffect(() => {
         if (errorMessage) {
