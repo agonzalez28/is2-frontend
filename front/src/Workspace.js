@@ -77,9 +77,12 @@ const Workspace = ({ onLogout }) => {
                     description: boardDescription,
                     color: gradients[Math.floor(Math.random() * gradients.length)], // Asignar un color aleatorio
                 }]);
-                console.log("Workspace creado exitosamente:", result);
-                console.log("cod_espacio:", result.cod_espacio);
-                setShowForm(false); // Cerrar el formulario
+                 console.log("Workspace creado exitosamente:", result);
+                // Almacenar cod_espacio en localStorage
+                 localStorage.setItem('cod_espacio', result.cod_espacio); // Almacena el cod_usuario
+                 console.log('cod_espacio:', result.cod_espacio)
+
+            setShowForm(false); // Cerrar el formulario
             } catch (error) {
                 setErrorMessage(error.message);
             }
