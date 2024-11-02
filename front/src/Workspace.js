@@ -6,6 +6,8 @@ const Workspace = ({ onLogout }) => {
     const navigate = useNavigate();
     const [showForm, setShowForm] = useState(false);
     const [boards, setBoards] = useState([]);  // Almacena los tableros creados
+    const [users, setUsers] = useState([]); // Almacena la lista de usuarios
+    const [selectedUsers, setSelectedUsers] = useState([]); // Estado para usuarios seleccionados
     const maxBoards = 9; // Máximo número de tableros permitidos
     const [errorMessage, setErrorMessage] = useState(""); // Estado para el mensaje de error
     const [visibility, setVisibility] = useState('Pública'); // Estado para la visibilidad
@@ -25,6 +27,7 @@ const Workspace = ({ onLogout }) => {
             navigate('/'); // Redirige si no hay usuario
         } else {
             fetchWorkspaces(); // Llama a la función para obtener los workspaces
+            fetchUsers(); // Llama a la función para obtener la lista de usuarios
         }
     }, [cod_usuario, navigate]);
 
@@ -58,6 +61,7 @@ const Workspace = ({ onLogout }) => {
                 descripcion: boardDescription,
                 estado: visibility,
                 cod_usuario: cod_usuario, // Usar cod_usuario del localStorage
+                usuarios: selectedUsers // Usar los usuarios seleccionados
             };
 
             try {
@@ -78,6 +82,7 @@ const Workspace = ({ onLogout }) => {
                     cod_espacio: result.cod_espacio // Almacenar el cod_espacio
                 }]);
                 console.log("Workspace creado exitosamente:", result);
+                console.log("Usuarios seleccionados para el workspace:", selectedUsers);
                 localStorage.setItem('cod_espacio', result.cod_espacio); // Almacena el cod_espacio
                 console.log('cod_espacio:', result.cod_espacio);
 
@@ -87,6 +92,27 @@ const Workspace = ({ onLogout }) => {
             }
         } else {
             setErrorMessage("Faltan datos obligatorios");
+        }
+    };
+
+    // Obtener la lista de usuarios
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/usuarios/'); 
+            if (!response.ok) throw new Error('Error al obtener la lista de usuarios');
+
+            const usersData = await response.json();
+            setUsers(usersData);
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
+    };
+
+    const handleUserSelection = (userId) => {
+        if (selectedUsers.includes(userId)) {
+            setSelectedUsers(selectedUsers.filter(id => id !== userId)); // Eliminar de la selección
+        } else {
+            setSelectedUsers([...selectedUsers, userId]); // Añadir a la selección
         }
     };
 
@@ -222,7 +248,25 @@ const Workspace = ({ onLogout }) => {
                                 <option value="Privada">Privada</option>
                                 <option value="Protegida">Protegida</option>
                             </select>
+
+                            <label htmlFor="userSelection">Asignar Usuarios</label>
+                            <div className="user-selection-container">
+                                <div className=' user-selection'>
+                                    {users.map(user => (
+                                    <div key={user.cod_usuario} className="user-selection">
+                                    <input
+                                        type="checkbox"
+                                        id={`user-${user.cod_usuario}`}
+                                        value={user.cod_usuario}
+                                        checked={selectedUsers.includes(user.cod_usuario)} // Verificar si el usuario está seleccionado
+                                        onChange={() => handleUserSelection(user.cod_usuario)} // Cambiar el manejo de selección
+                                    />
+                                     {user.nom_usuario}
+                                </div>
+                            ))}
+                            </div>
                         </div>
+                    </div>
                         <button className="create-board-button" onClick={() => handleCreateBoard(document.getElementById('boardTitle').value, document.getElementById('boardDescription').value)}>
                             Crear
                         </button>

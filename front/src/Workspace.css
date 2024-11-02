@@ -368,3 +368,33 @@ select.input-field {
   cursor: pointer;
 }
 
+.user-selection-container {
+  background-color:ffffff; /* Color de fondo del contenedor */
+  padding: 20px; /* Espaciado interno */
+  max-width: 400px; /* Ancho máximo del contenedor */
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+
+.user-selection input[type="checkbox"] {
+  width: 12px; /* Cambia el tamaño del checkbox */
+  height: 12px; /* Cambia el tamaño del checkbox */
+  appearance: none; /* Quita el estilo por defecto del checkbox */
+  border: 2px solid #ccc; /* Recuadro del checkbox */
+  border-radius: 4px; /* Esquinas redondeadas */
+  outline: none; /* Quita el borde al hacer foco */
+  cursor: pointer; /* Cambia el cursor al pasar sobre el checkbox */
+  margin-right: 8px; /* Espacio entre el checkbox y la etiqueta */
+  transition: background-color 0.2s ease; /* Transición para el fondo */
+}
+
+.user-selection input[type="checkbox"]:checked {
+  background-color: #8588fc; /* Color de fondo cuando está seleccionado */
+  border-color: #7779f3; /* Color del borde cuando está seleccionado */
+}
+
+.user-selection input[type="checkbox"]:hover {
+  border-color: #000; /* Color del borde al pasar el mouse */
+}
+
+
