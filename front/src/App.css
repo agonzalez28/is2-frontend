@@ -1,0 +1,64 @@
+/* src/components/App.css */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+}
+
+.app-header {
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.app-header.menu {
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+}
+
+.app-header.centered {
+  justify-content: center; /* Alinea al centro */
+} 
+
+.app-header.left-aligned {
+  justify-content: flex-start; /* Alinea el contenido a la izquierda */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-left h1 {
+  margin: 0 0 0 10px; /* Espacio entre el ícono y el título */
+}
+
+.app-main {
+  flex: 1;
+  padding: 20px;
+  background-color: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+  text-align: center;
+}
+
+.app-footer {
+  background-color: #282c34;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+p {
+  margin: 0;
+}

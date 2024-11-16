@@ -1,0 +1,168 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Contenedor principal del login */
+.login-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+  padding: 0 10%;
+  box-sizing: border-box;
+}
+
+/* Estilos para el lado izquierdo (cohete y texto) */
+.left-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 40%;
+  padding-left: 50px;
+}
+
+.title {
+  color: white;
+  font-size: 3rem;
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+/* Contenedor del lado derecho (formulario + Google SSO) */
+.right-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 40%;
+  padding-right: 50px;
+}
+
+/* Estilos para el formulario */
+.login-form {
+  background-color: transparent;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px; 
+  /*border-radius: 10px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);*/
+}
+
+.login-form h2 {
+  color: white; /* Cambia el color a blanco */
+  text-align: center; /* Alinea el título a la izquierda */
+  width: 100%;
+  margin-bottom: 20px; /* Ajusta el margen inferior */
+}
+
+.login-form label {
+  color: white; /* Cambia el color de los labels a blanco */
+  font-weight: bold;
+  margin-bottom: 2px; /* Añade espacio entre el label y el input */
+  text-align: left; /* Alinea el texto a la izquierda */
+  display: block; /* Para que el texto del label ocupe toda la línea */
+}
+
+.login-form input {
+  padding: 15px;
+  border: none;/*1px solid #ccc;*/
+  border-radius: 30px;
+  background-color: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
+  color: white; /* Texto en blanco */
+  font-size: 1rem;
+  outline: none;
+  margin-bottom: 5px; /* Espacio entre los inputs */
+}
+
+.login-form input:hover {
+  background-color: #a1a8a7;
+}
+
+.login-form input::placeholder {
+  color: white;
+  opacity: 0.8;
+}
+
+.login-form button {
+  padding: 15px;
+  border-radius: 30px;
+  background-color: white;
+  color: black;
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.login-form button:hover {
+  background-color: #c4d6d2;
+}
+
+.signup-link {
+  color: #ffffff;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.signup-link a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Estilos del botón de Google SSO */
+.google-sso {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Estilos para la ilustración del cohete */
+.rocket-image {
+  max-width: 100%;
+  height: auto;
+}
+
+
+.small-button {
+  padding: 10px 20px; /* Tamaño más pequeño */
+  border-radius: 20px; /* Bordes ligeramente menos redondeados */
+  background-color: white;
+  color: black;
+  border: none;
+  font-size: 0.9rem; /* Un poco más pequeño que el botón original */
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.small-button:hover {
+  background-color: #c4d6d2;
+}
+
+.success-message {
+  background-color: rgba(255, 255, 255, 0.2); 
+  color: white; 
+  border: 1px solid rgba(255, 255, 255, 0.5); 
+  border-radius: 30px; 
+  padding: 15px; 
+  margin: 20px 0; 
+  font-size: 1.2rem; 
+  text-align: center; 
+  transition: background-color 0.3s ease; 
+}
+
+.success-message:hover {
+  background-color: rgba(255, 255, 255, 0.3); 
+}
+

@@ -1,0 +1,400 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Estilos para el componente workspace */
+.workspace-container {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #f8f8f8;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .workspace-header {
+    background-color: transparent;
+    padding: 20px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    border-bottom: none;
+    /*position: relative;*/
+  }
+  
+  .workspace-header h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #000;
+    margin-right: 20px;
+    margin: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    max-width: 40%;
+  }
+  
+  .header-left h1 {
+    margin: 0 0 0 10px; /* Espacio entre el ícono y el título */
+  }
+  
+  .workspace-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Centra el contenido principal */
+    padding: 20px;
+    /*background-color: #f0f0f0;*/
+  }
+
+  .workspace-main p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-top: 20px;
+  }
+  
+  p {
+    margin: 0;
+  }
+
+  .workspace-image {
+    margin-top: 1px; /* Espacio arriba de la imagen */
+    max-width: 100%;   /* Ajusta la imagen para que no se desborde del contenedor */
+    height: 3auto;      /* Mantiene la proporción de la imagen */
+  }
+
+  .workspace-header .logo {
+    margin-right: auto; /* Esto coloca el logo a la izquierda y el resto a la derecha */
+  }
+
+  .workspace-header .logo-img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .workspace-footer {
+    background: linear-gradient(90deg, #000 0%, #2d4b8b 100%);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.2rem;
+    position: relative;
+    width: 100%;
+    bottom: 0;
+    margin-block: 0px;
+}
+
+  .user-session {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-session i {
+    font-size: 2rem;
+  }
+
+  .user-session button {
+    background-color: transparent;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: black;
+  }
+
+  .user-session button:hover {
+    text-decoration: underline;
+  }
+  
+  .no-board-image {
+    width: 200px;
+    height: auto;
+  }
+
+  .image-container {
+    left: 0; /* Alinea a la izquierda */
+    top: 50%; /* Centra verticalmente */
+    transform: translateY(-50%); /* Ajusta el centrado vertical */
+  }
+  
+  .left-image {
+    width: 100px; /* Ajusta el tamaño de la imagen */
+    height: auto;
+  }
+
+  .create-board-icon {
+    position: absolute;
+    top: 0px; /* Ajusta según tu preferencia */
+    left: 0px; /* Ajusta según tu preferencia */
+  }
+  
+  .create-icon {
+    width: 125px; /* Tamaño del ícono */
+    height: auto;
+    cursor: pointer;
+  }
+
+  /* Estilo del contenedor del tooltip */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Estilo del texto del tooltip */
+.tooltiptext {
+  visibility: hidden;
+  width: 120px; /* Ajusta el ancho según sea necesario */
+  background-color: #666464;
+  color: #ffffff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 11;
+  bottom: 0%; /* Muestra el texto arriba del ícono */
+  left: 115%;
+  margin-left: -60px; /* Ajusta para centrar el tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+}
+
+/* Muestra el tooltip al pasar el ratón */
+.tooltip:hover .tooltiptext {
+  visibility: visible !important;
+  opacity: 500 !important;
+}
+
+/* Estilos para el modal */
+.form-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.form-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 350px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  position: relative;
+  margin-left: -800px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.form-header h2 {
+  font-size: 1.2rem;
+  color: #000;
+  font-weight: bold;
+  margin: 0;
+}
+
+.form-header i {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.close-form {
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.form-image-container img {
+  width: 75%;
+  border-radius: 10px;
+}
+
+.form-container input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+.form-container p {
+  color: #999;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.create-board-button {
+  background: linear-gradient(90deg, #000 0%, #2d4b8b 100%);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 15px;
+  font-size: 1rem;
+}
+
+.create-board-button:hover {
+  background: linear-gradient(90deg, #2d4b8b 0%, #000 100%);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  font-size: 1rem; /* Ajusta el tamaño del texto del label */
+  color: #333;     /* Color del texto */
+  margin-bottom: 5px; /* Espacio entre el label y el input */
+  margin-top: 10px;
+}
+
+.input-field {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  font-size: 1rem;
+  box-sizing: border-box;
+  outline: none;
+}
+
+select.input-field {
+  appearance: none; /* Para que el select tenga estilo personalizado */
+  background-color: white; /* Fondo blanco para que sea consistente con el input */
+  -webkit-appearance: none; /* Para Safari */
+  -moz-appearance: none; /* Para Firefox */
+  padding-right: 10px; /* Espacio para la flecha del select */
+  border-radius: 20px; /* Borde redondeado */
+}
+
+.board-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Ajusta el tamaño de las columnas */
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.board {
+  width: 150px;
+  height: 150px;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.board.create-new {
+  background: #f0f0f0;
+  color: black;
+  cursor: pointer;
+}
+
+.board.create-new span {
+  font-size: 2.5rem;
+  font-weight: bold;  
+}
+
+.delete-board-button {
+  position: absolute;
+  top: 10px;  /* Posición en la esquina superior derecha */
+  right: 10px;
+  background-color: transparent; /* Hacer el fondo transparente */
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.2rem; /* Tamaño del ícono */
+  transition: color 0.3s ease;
+}
+
+.delete-board-button:hover {
+  color: black; /* Cambia el color al pasar el ratón por encima */
+}
+
+.error-message {
+  color: black;
+  background-color: #e2e1e1;
+  border: 1px solid rgb(163, 163, 163);
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin: 10px 0;
+  font-weight: bold;
+  position: absolute; /* Cambiar a absolute */
+  top: 20px; /* Ajustar la distancia desde la parte superior */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px; /* Ajustar el ancho al contenido */
+  z-index: 100; /* Asegurarse de que el mensaje esté por encima del resto */
+}
+
+.close-error {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  position: absolute;
+  top: 7px; /* Ajusta según sea necesario */
+  right: -2px; /* Posición de la 'X' a la derecha del mensaje */
+  cursor: pointer;
+}
+
+.user-selection-container {
+  background-color:ffffff; /* Color de fondo del contenedor */
+  padding: 20px; /* Espaciado interno */
+  max-width: 400px; /* Ancho máximo del contenedor */
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+
+.user-selection input[type="checkbox"] {
+  width: 12px; /* Cambia el tamaño del checkbox */
+  height: 12px; /* Cambia el tamaño del checkbox */
+  appearance: none; /* Quita el estilo por defecto del checkbox */
+  border: 2px solid #ccc; /* Recuadro del checkbox */
+  border-radius: 4px; /* Esquinas redondeadas */
+  outline: none; /* Quita el borde al hacer foco */
+  cursor: pointer; /* Cambia el cursor al pasar sobre el checkbox */
+  margin-right: 8px; /* Espacio entre el checkbox y la etiqueta */
+  transition: background-color 0.2s ease; /* Transición para el fondo */
+}
+
+.user-selection input[type="checkbox"]:checked {
+  background-color: #8588fc; /* Color de fondo cuando está seleccionado */
+  border-color: #7779f3; /* Color del borde cuando está seleccionado */
+}
+
+.user-selection input[type="checkbox"]:hover {
+  border-color: #000; /* Color del borde al pasar el mouse */
+}
+
+
