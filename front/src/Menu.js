@@ -103,6 +103,8 @@ const Menu = ({ onLogout }) => {
                     // Si se creó correctamente, añade el nuevo tablero 
                     setBoards(prevBoards => [...prevBoards, { title: boardTitle, color: randomGradient, id: data.cod_tablero }]);
                     console.log("Tablero creado con éxito! ");
+                    localStorage.setItem('cod_tablero', data.cod_tablero); // Almacena el cod_tablero 
+                    console.log("cod_tablero: ",data.cod_tablero)
                     handleCloseForm(); // Cerrar el formulario
                 } else {
                     // Manejo de errores
