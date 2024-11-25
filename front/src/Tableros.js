@@ -249,90 +249,180 @@ const Tableros = () => {
 
   return (
     <div className="tableros-container">
-      <div className="tablero-solapa">
-        {title}
-      </div>
-      <main className="tableros-main">
-        <div className={`list-container ${lists.length === 0 ? 'empty' : ''}`}>
-        {lists.length === 0 && (
-          <div className="no-lists">
-            <div className="add-list">
-              <button onClick={() => setShowInput(!showInput)}>
-                <i className={showInput ? "fas fa-times" : "fas fa-plus"}></i>
-                {showInput ? 'Cancelar' : 'Añadir otra lista'}
-              </button>
-            </div>
-          </div>
-        )}
-        <div className="list-scroll-container">
-          <div className="list-container">
-          {lists.map((list, listIndex) => (
-            <div key={listIndex} className="list">
-              <h3>{list.name}</h3>
-              <button className="options-button" onClick={() => toggleOptions(listIndex)}>
+    <div className="tablero-solapa">
+        {title} 
+    </div>
+    <main className="tableros-main">
+      <div className={`list-container ${lists.length === 0 ? 'no-lists' : ''}`}>
+        {lists.map((list, index) => (
+          <div key={index} className="list">
+            <h3>{list.name}</h3>
+            <div className="options-menu-container">
+              <button className="options-button" onClick={() => toggleOptions(index)}>
                 <i className="fas fa-ellipsis-h"></i>
               </button>
-              {showOptionsIndex === listIndex && (
-              <div className="options-menu-container">
+              {showOptionsIndex === index && (
                 <div className="options-menu">
-                  <button className="options-button" onClick={() => handleDeleteList(list.cod_lista)}>Eliminar</button>
-                </div>
-              </div>
-              )}
-              {list.cards.map((card, cardIndex) => (
-                <div key={cardIndex} className="add-card-button" onClick={() => handleCardClick(listIndex, cardIndex)}>
-                  <h4>{card.name}</h4>
-                </div>
-              ))}
-              <button className="add-card-button" onClick={() => setShowCardInputIndex(listIndex)}>
-               <strong> {showCardInputIndex === listIndex ? 'Cancelar' : '+ Añadir una tarjeta'}</strong>
-              </button>
-              {showCardInputIndex === listIndex && (
-                <div className="add-card-form">
-                  <input
-                    type="text"
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                    placeholder="Nombre de la tarjeta"
-                  />
-                  <div className="add-card-buttons">
-                  <button className="add-card-button" onClick={() => handleAddCard(listIndex)}> Añadir una tarjeta </button>
-                  <button className="close-button" onClick={() => setShowCardInputIndex(null)}>X</button>
-                  </div>
+                  <button onClick={() => handleDeleteList(list.cod_lista)}>Eliminar</button>
                 </div>
               )}
             </div>
-            ))}
-            <div className={`add-list ${lists.length === 0 ? 'first-list' : ''}`}>
-                {!showInput && (
-                    <button onClick={() => setShowInput(true)}>
-                      <i className="fas fa-plus"></i> Añade otra lista
-                    </button>
+            <div className="cards-container">
+            {list.cards && list.cards.map((card, cardIndex) => (
+              <div 
+                key={cardIndex} 
+                className="card" 
+                onClick={() => handleCardClick(index, cardIndex)} // Redirigir al hacer clic en la tarjeta
+              >
+                {card.etiqueta && (
+                  <div className="etiqueta" style={{ background: card.etiquetaColor || 'linear-gradient(135deg, #B993D6 0%, #8CA6DB 100%)' }}>
+                    {card.etiqueta}
+                  </div>
                 )}
-                {showInput && (
-                    <div className="add-list-form">
-                      <input
-                          type="text"
-                          value={listName}
-                          onChange={(e) => setListName(e.target.value)}
-                          placeholder="Nombre de la lista..."
-                      />
-                      <div className="add-list-buttons">
-                        <button className="add-list-button" onClick={handleAddList}>Añadir Lista</button>
-                        <button className="close-button" onClick={() => setShowInput(false)}>X</button>
-                      </div>
-                    </div>
-                )}
+                {card.name} {/* Accede a la propiedad 'name' del objeto 'card' */}
               </div>
+            ))}
+            </div>
+            {showCardInputIndex === index ? (
+              <div className="add-card-form">
+                <input
+                  type="text"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
+                />
+                <div className="add-card-buttons">
+                  <button className="add-card-button" onClick={() => handleAddCard(index)}>Añadir tarjeta</button>
+                  <button className="close-button" onClick={() => setShowCardInputIndex(null)}>X</button>
+                </div>
+              </div>
+            ) : (
+              <button className="add-card-button" onClick={() => setShowCardInputIndex(index)}>
+                <strong> + Añadir una tarjeta </strong>
+              </button>
+            )}
+          </div>
+        ))}
+        <div className={`add-list ${lists.length === 0 ? 'first-list' : ''}`}>
+          {!showInput && (
+            <button onClick={() => setShowInput(true)}>
+              <i className="fas fa-plus"></i> Añade otra lista
+            </button>
+          )}
+          {showInput && (
+            <div className="add-list-form">
+              <input
+                type="text"
+                value={listName}
+                onChange={(e) => setListName(e.target.value)}
+                placeholder="Nombre de la lista..."
+              />
+              <div className="add-list-buttons">
+                <button className="add-list-button" onClick={handleAddList}>Añadir Lista</button>
+                <button className="close-button" onClick={() => setShowInput(false)}>X</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+    {/* Modal para mostrar los detalles de la tarjeta */}
+    <Modal show={showModal} onClose={handleCloseModal}>
+      <div className="tarjeta-detalle-container">
+        {/* Botón "X" para cerrar el modal */}
+        <button className="close-modal-button" onClick={handleCloseModal}>X</button>
+        <div className="tarjeta-cabecera">
+          <h2>{selectedCard?.name}</h2>  {/* Verifica que 'selectedCard' no sea null o undefined antes de acceder a 'name' */}
+              <select
+                  id="visibility"
+                  name="visibility"
+                  className={`input-field ${visibility.toLowerCase().replace(' ', '-')}`} // Generar la clase dinámica
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value)}
+              >
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="En   Curso">En Curso</option>
+                  <option value="Finalizado">Finalizado</option>
+              </select>
+        </div>
+        <div className="tarjeta-contenido">
+          <div className="columna-izquierda">
+            <div className="descripcion">
+                <h3>Descripción</h3>
+                <textarea
+                  className="descripcion-textarea"
+                  value={descripcion}
+                  onChange={handleDescripcionChange}
+                />
+            </div>
+            <div className="subtareas">
+              <h3>Subtareas 
+                <button className="add-subtarea-button" onClick={toggleSubtareaInput}>
+                  + Agregar Subtarea
+                </button>
+              </h3>
+              
+              {/* Solo muestra el input si showSubtareaInput es true */}
+              {showSubtareaInput && (
+                <div className="subtarea-input-container">
+                <input
+                  type="text"
+                  className="subtarea-input" // Para aplicar el estilo
+                  value={newSubtarea}
+                  onChange={(e) => setNewSubtarea(e.target.value)}
+                  placeholder="Escribe una subtarea..."
+                />
+                {/* Botón para guardar la subtarea */}
+                <button className="crear-subtarea-button" onClick={handleAddSubtarea}>
+                  Crear
+                </button>
+              </div>
+              )}
+              {/* Muestra las subtareas si hay alguna */}
+              {subtareas.length > 0 ? (
+                <ul>
+                  {subtareas.map((subtarea, index) => (
+                    <li key={index} onClick={() => handleSubtareaClick(subtarea)}> {/* Al hacer clic, abre el modal */}
+                      <span>{subtarea.text}</span>
+                      <span
+                        className={`estado-boton ${subtarea.estado.toLowerCase()}`} // Agrega una clase dinámica según el estado
+                      >
+                        {subtarea.estado}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                // Si no hay subtareas y no se está mostrando el input, muestra el mensaje
+                !showSubtareaInput && <p>No hay subtareas.</p>
+              )}
+            </div>
+          </div>
+          <div className="columna-derecha">
+            <div className="detalles">
+              <h3>Detalles</h3>
+              <p1>Persona Asignada  <input type="text" placeholder="Asignado a..." /></p1>
+              <p1>Creado el </p1>
+              <p>{createdDate}</p>
+              <p1>Vence el </p1>
+              <p>{modifiedDate}</p>
+              <p1>Añadir Etiqueta 
+                <input 
+                  type="text" 
+                  value={etiqueta} // Conecta el input con el estado "etiqueta"
+                  onChange={(e) => setEtiqueta(e.target.value)} // Actualiza el estado cuando el usuario escribe
+                  placeholder="Etiqueta" 
+                />
+              </p1>
+            </div>
           </div>
         </div>
-        </div>
-      </main>
-      <footer className="tableros-footer">
-          <p>© TaskFlow - 2024</p>
-        </footer>
-    </div>
-  );
+      </div>
+    </Modal>
+    <footer className="tableros-footer">
+      <p>© TaskFlow - 2024</p>
+    </footer>
+  </div>
+);
 };
 
 export default Tableros;
