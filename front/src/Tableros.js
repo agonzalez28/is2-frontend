@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';  
 import { useParams, useNavigate } from 'react-router-dom';
+import 'react-datepicker/dist/react-datepicker.css';
+import DatePicker from 'react-datepicker'; 
 import './Tableros.css';
 import Modal from './Modal'; 
 import SubtareaModal from './SubModal'; 
@@ -15,7 +17,7 @@ const Tableros = () => {
   const [selectedCard, setSelectedCard] = useState(null); 
   const [showModal, setShowModal] = useState(false); 
   const [descripcion, setDescripcion] = useState(''); 
-  const [createdDate, setCreatedDate] = useState(''); 
+  const [createdDate, setCreatedDate]  = useState(''); ; 
   const [modifiedDate, setModifiedDate] = useState(''); 
   const [subtareas, setSubtareas] = useState([]); 
   const [newSubtarea, setNewSubtarea] = useState(''); 
@@ -47,32 +49,39 @@ const Tableros = () => {
     }
   }, [descripcion]);
 
-  useEffect(() => {
-    const fetchLists = async () => {
-      if (!cod_tablero) {
-        console.error("No se encontró el código del tablero.");
-        return;
-      }
+useEffect(() => {
+  const fetchLists = async () => {
+    if (!cod_tablero) {
+      console.error("No se encontró el código del tablero.");
+      return;
+    }
 
-      try {
-        const response = await fetch(`http://localhost:8000/api/tableros/listas/obtener_listas_tableros/${cod_tablero}/`);
-        if (response.ok) {
-          const data = await response.json();
-          setLists(data.listas.map((lista) => ({
+    try {
+      const response = await fetch(`http://localhost:8000/api/tableros/listas/obtener_listas_tableros/${cod_tablero}/`);
+      if (response.ok) {
+        const data = await response.json();
+        const updatedLists = await Promise.all(data.listas.map(async (lista) => {
+          // Obtener las tarjetas de cada lista
+          const cardsResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/obtener_tarjetas/${lista.cod_lista}/`);
+          const cardsData = await cardsResponse.json();
+          return {
             cod_lista: lista.cod_lista,
             name: lista.nom_lista,
-            cards: [] // Inicializa vacío si aún no hay tarjetas
-          })));
-        } else {
-          console.error("Error al obtener las listas:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error al obtener las listas:", error);
-      }
-    };
+            cards: cardsData.tarjetas || [] 
+          };
+        }));
 
-    fetchLists();
-  }, [cod_tablero]);
+        setLists(updatedLists); // Actualiza el estado de las listas con las tarjetas
+      } else {
+        console.error("Error al obtener las listas:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error al obtener las listas:", error);
+    }
+  };
+
+  fetchLists();
+}, [cod_tablero]);
 
   const sumarDias = (fecha, dias) => {
     const nuevaFecha = new Date(fecha);
@@ -115,19 +124,19 @@ const Tableros = () => {
     }
   };
 
-  const handleDeleteList = async (codLista) => {
-    if (!codLista) {
+  const handleDeleteList = async (cod_lista) => {
+    if (!cod_lista) {
       console.error("codLista es undefined");
       return;
     }
     try {
-      const response = await fetch(`http://localhost:8000/api/tableros/listas/eliminar_lista/${codLista}/`, {
+      const response = await fetch(`http://localhost:8000/api/tableros/listas/eliminar_lista/${cod_lista}/`, {
         method: 'DELETE',
       });
       if (response.ok) {
         console.log("Lista eliminada exitosamente");
         // Actualiza el estado para reflejar la eliminación en la UI
-        setLists(lists.filter((list) => list.cod_lista !== codLista));
+        setLists(lists.filter((list) => list.cod_lista !== cod_lista));
       } else {
         console.error("Error al eliminar la lista:", response.statusText);
       }
@@ -140,26 +149,60 @@ const Tableros = () => {
     setShowOptionsIndex(index === showOptionsIndex ? null : index); 
   };
 
-  const handleAddCard = (index) => {
+  const handleAddCard = async (index) => {
     if (cardName.trim() !== "") {
-      const updatedLists = [...lists];
-      updatedLists[index].cards.push({
-        name: cardName,
-        subtareas: [],
-        etiquetaColor: getRandomGradient(),
-      });
-      
-      const fechaModificada = sumarDias(new Date(), 7);
-      setLists(updatedLists); 
-      setCardName(""); 
-      setShowCardInputIndex(null); 
-      setCreatedDate(getCurrentDate()); 
-      setModifiedDate(fechaModificada.toLocaleString());
-    } else {
-      alert("El nombre de la tarjeta no puede estar vacío");
-    }
-  };
+        const updatedLists = [...lists];
 
+        // Definir nueva tarjeta para el frontend
+        const newCard = {
+            name: cardName,
+            subtareas: [],
+            etiquetaColor: getRandomGradient(),
+        };
+
+        updatedLists[index].cards.push(newCard);
+
+        // Realiza el POST al backend para agregar la tarjeta
+        try {
+            const response = await fetch('http://localhost:8000/api/tableros/listas/tarjetas/crear_tarjeta/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nom_tarjeta: cardName,
+                    cod_lista: updatedLists[index].cod_lista,  // Envía el cod_lista de la lista donde agregarás la tarjeta
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Tarjeta agregada:", data);
+
+                // Actualiza la tarjeta en el estado local con el cod_tarjeta generado
+                updatedLists[index].cards[updatedLists[index].cards.length - 1] = { 
+                    ...newCard, 
+                    cod_tarjeta: data.cod_tarjeta,  // Asigna el cod_tarjeta recibido del backend
+                };
+
+                setLists(updatedLists);
+                setCardName("");  // Limpia el campo de nombre de tarjeta
+                setShowCardInputIndex(null);  // Oculta el campo de entrada
+                setCreatedDate(getCurrentDate());  // Establece la fecha de creación
+                setModifiedDate(sumarDias(new Date(), 7).toLocaleString());  // Modifica la fecha de modificación
+            } else {
+                console.error("Error al agregar la tarjeta:", response.statusText);
+                alert("Error al agregar la tarjeta");
+            }
+        } catch (error) {
+            console.error("Error al agregar la tarjeta:", error);
+            alert("Error al agregar la tarjeta");
+        }
+    } else {
+        alert("El nombre de la tarjeta no puede estar vacío");
+    }
+};
+  
   const handleSubtareaClick = (subtarea) => {
     setSelectedSubtarea(subtarea);
     setShowSubtareaModal(true);
@@ -169,12 +212,45 @@ const Tableros = () => {
     const selectedCard = lists[listIndex]?.cards[cardIndex]; 
     if (selectedCard) {
       setSelectedCard({ ...selectedCard, listIndex, cardIndex });
-      setSubtareas([...selectedCard.subtareas]);  
+      setSubtareas(Array.isArray(selectedCard.subtareas) ? selectedCard.subtareas : []);
       setShowModal(true);
     } else {
       console.error('No se encontró la tarjeta.');
     }
+    
   };
+
+  const handleUpdateCard = async (cod_tarjeta) => {
+    try {
+      const updatedData = {
+        nom_tarjeta: selectedCard?.name, // O lo que sea necesario actualizar
+        descripcion: descripcion, // O cualquier otro campo
+      };
+  
+      // Hacer la solicitud PUT al backend
+      const response = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/actualizar_tarjeta/${cod_tarjeta}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        // Actualiza el estado del frontend con la respuesta del backend
+        console.log(result);
+        alert("Tarjeta actualizada con éxito.");
+        // Aquí podrías actualizar el estado local o hacer otras acciones necesarias.
+      } else {
+        throw new Error(result.error || 'Hubo un error al actualizar la tarjeta');
+      }
+    } catch (error) {
+      console.error("Error al actualizar tarjeta:", error);
+      alert(error.message);
+    }
+  };  
 
   const handleCloseModal = () => {
     if (selectedCard) {
@@ -279,7 +355,7 @@ const Tableros = () => {
                     {card.etiqueta}
                   </div>
                 )}
-                {card.name} {/* Accede a la propiedad 'name' del objeto 'card' */}
+                {card.nom_tarjeta} {/* Accede a la propiedad 'name' del objeto 'card' */}
               </div>
             ))}
             </div>
@@ -331,7 +407,7 @@ const Tableros = () => {
         {/* Botón "X" para cerrar el modal */}
         <button className="close-modal-button" onClick={handleCloseModal}>X</button>
         <div className="tarjeta-cabecera">
-          <h2>{selectedCard?.name}</h2>  {/* Verifica que 'selectedCard' no sea null o undefined antes de acceder a 'name' */}
+          <h2>{selectedCard?.nom_tarjeta}</h2>  {/* Verifica que 'selectedCard' no sea null o undefined antes de acceder a 'name' */}
               <select
                   id="visibility"
                   name="visibility"
@@ -396,15 +472,25 @@ const Tableros = () => {
                 !showSubtareaInput && <p>No hay subtareas.</p>
               )}
             </div>
+            <button className="add-card-button" onClick={() => handleUpdateCard(selectedCard?.cod_tarjeta)}>
+                <strong> + Actualizar Tarjeta </strong>
+              </button>
           </div>
           <div className="columna-derecha">
             <div className="detalles">
               <h3>Detalles</h3>
               <p1>Persona Asignada  <input type="text" placeholder="Asignado a..." /></p1>
               <p1>Creado el </p1>
-              <p>{createdDate}</p>
+              <p>{createdDate || 'No disponible'}</p>
               <p1>Vence el </p1>
-              <p>{modifiedDate}</p>
+                  <DatePicker
+                      selected={modifiedDate instanceof Date ? modifiedDate : new Date()}
+                      onChange={(date) => setModifiedDate(date instanceof Date ? date : new Date())}
+                      dateFormat="dd/MM/yyyy HH:mm:ss"
+                      showTimeSelect
+                      timeFormat="HH:mm:ss"
+                      placeholderText="Selecciona una fecha y hora"
+                  />
               <p1>Añadir Etiqueta 
                 <input 
                   type="text" 
