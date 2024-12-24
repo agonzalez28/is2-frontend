@@ -6,6 +6,7 @@ import SignUp from './SignUp';
 import Menu from './Menu'; // Importar el nuevo componente
 import Tableros from './Tableros'; // La nueva página que mostraremos
 import Workspace from './Workspace'; // La nueva página que mostraremos
+import Dashboard from './Dashboard'; // Importa el componente del Dashboard
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -28,6 +29,7 @@ function App() {
             <Route path="/workspace" element={isAuthenticated ? <Workspace onLogout={handleLogout} /> : <Navigate to="/" />} />
             <Route path="/menu/:title" element={isAuthenticated ? <Menu onLogout={handleLogout} /> : <Navigate to="/" />} />
             <Route path="/tableros/:title" element={<Tableros />} />
+            <Route path="/dashboard" element={isAuthenticated ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/" />} />
           </Routes>
         </main>
       </div>

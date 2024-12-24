@@ -155,7 +155,7 @@ const Menu = ({ onLogout }) => {
             <header className="menu-header">
                 <div className="create-board-icon" onClick={handleCreateBoardClick}>
                     <div className="tooltip">
-                        <img src="/img10_Crea_Tablero.png" alt="Crear Tablero" className="create-icon" />
+                        <img src="/img10_Crea_Tablero.png" alt="Crear Tablero" className="create-icon"/>
                         <span className="tooltiptext">Crear un nuevo tablero</span>
                     </div>
                 </div>
@@ -176,16 +176,17 @@ const Menu = ({ onLogout }) => {
                 {boards.length > 0 && (
                     <h2 className="workspace-title">Mis Tableros</h2>
                 )}
-                {(boards.length === 0 && !showForm) ? (
+                {(boards.length === 0 && !showForm) || boards.length === 0 ? (
                     <div>
-                        <img src="/img9_Workspace.png" alt="No se encuentran Tableros" className="menu-image" />
+                        <img src="/img9_Workspace.png" alt="No se encuentran Tableros" className="menu-image"/>
                         <p>Crea tu primer tablero :)</p>
                     </div>
                 ) : (
                     <div className="board-list">
                         {boards.map((board, index) => (
-                            <div key={index} className="board" style={{ background: board.color }} onClick={() => handleBoardClick(board.title)}>
-                                <p style={{ color: 'white' }}>{board.title}</p>
+                            <div key={index} className="board" style={{background: board.color}}
+                                 onClick={() => handleBoardClick(board.title)}>
+                                <p style={{color: 'white'}}>{board.title}</p>
                                 <button className="delete-board-button" onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteBoard(index);
@@ -209,15 +210,15 @@ const Menu = ({ onLogout }) => {
                             <span className="close-form" onClick={handleCloseForm}>&times;</span>
                         </div>
                         <div className="form-image-container">
-                          <img src="/img7_Tablero_Default.png" alt="Ejemplo de Tablero" />
+                            <img src="/img7_Tablero_Default.png" alt="Ejemplo de Tablero"/>
                         </div>
                         <div className="form-group">
                             <label htmlFor="boardTitle">Titulo del Tablero</label>
-                            <input 
-                                type="text" 
-                                id="boardTitle" 
-                                name="boardTitle" 
-                                className="input-field" 
+                            <input
+                                type="text"
+                                id="boardTitle"
+                                name="boardTitle"
+                                className="input-field"
                                 value={boardTitle}
                                 onChange={(e) => setBoardTitle(e.target.value)} // Cambiar el estado con la entrada del usuario
                                 onKeyPress={(e) => {
@@ -225,11 +226,11 @@ const Menu = ({ onLogout }) => {
                                 }}
                             />
                             <label htmlFor="boardDescription">Descripción</label>
-                            <input 
-                                type="text" 
-                                id="boardDescription" 
-                                name="boardDescription" 
-                                className="input-field" 
+                            <input
+                                type="text"
+                                id="boardDescription"
+                                name="boardDescription"
+                                className="input-field"
                                 value={boardDescription}
                                 onChange={(e) => setBoardDescription(e.target.value)} // Cambiar el estado con la entrada del usuario
                             />
@@ -240,6 +241,9 @@ const Menu = ({ onLogout }) => {
                     </div>
                 </div>
             )}
+        <footer className="menu-footer">
+            <p>© TaskFlow - 2024</p>
+        </footer>
         </div>
     );
 };

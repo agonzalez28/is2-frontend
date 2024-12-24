@@ -22,6 +22,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 20px;
+  overflow: hidden;
 }
 
 .tableros-main .list-container.empty .add-list-button {
@@ -37,10 +38,26 @@
 }
 .list-container {
   display: flex;
-  flex-wrap: wrap;
+  min-height: 100%; /* Asegura que el contenedor tenga un tamaño mínimo */
+  max-height: 100%; /* Evita que crezca más de lo necesario */
   gap: 20px;
-  width: 100%;
   align-items: flex-start; /* Alinear los elementos en la parte superior */
+  overflow-x: auto; /* Habilita el desplazamiento horizontal */
+  padding: 10px; /* Añade un pequeño padding para que las listas no queden pegadas al borde */
+  scrollbar-width: thin; /* Para navegadores como Firefox */
+}
+
+.list-container::-webkit-scrollbar {
+  height: 8px; /* Altura de la barra de desplazamiento */
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  background-color: #6a11cb; /* Color de la barra */
+  border-radius: 4px;
+}
+
+.list-container::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Color de fondo de la barra */
 }
 
 .list {
@@ -127,7 +144,7 @@
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  padding: -1 px;
+  padding: 0;
 }
 
 .options-menu button {
@@ -264,6 +281,7 @@
   top: 0px; /* Ajusta la posición vertical */
   font-size: 1.05rem; /* Tamaño de la fuente */
   font-weight: bold; /* Negrita */
+  margin-right: 1rem; /* Ajusta la separación entre la solapa y los filtros */
 }
 
 
@@ -424,7 +442,7 @@
   font-weight: bold;
   padding-top: 0; /* Asegúrate de que el h2 no tenga padding superior */
   margin-bottom: 0px;
-} 
+}
 
 .tarjeta-contenido {
   display: flex;
@@ -477,7 +495,7 @@
   background-color: #d9d9d9;
   border-radius: 10px;
   padding: 10px;
-  width: 320px; 
+  width: 320px;
   height: auto;
   margin-top: 5px;
 }
@@ -486,8 +504,7 @@
   background-color: #c4c4c4;
   border-radius: 10px;
   padding: 10px;
-
-  width: 180px; 
+  width: 180px;
   height: auto;
 }
 
@@ -500,7 +517,7 @@
   margin-bottom: 5px;
 }
 
-.detalles input { 
+.detalles input {
   width: auto;
   padding: 5px;
   border: none;
@@ -548,6 +565,31 @@
   font-family: inherit;
   font-size: 0.8rem;
   color: #5b5b5b;
+}
+
+/* Estilo del campo select */
+.detalles label {
+  display: block;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.detalles select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background-color: #dfdcdc;
+  font-size: 0.8rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.detalles select:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0px 0px 5px rgba(74, 144, 226, 0.3);
 }
 
 .subtareas {
@@ -703,4 +745,232 @@ select.input-field {
 
 .etiqueta:hover {
   opacity: 0.9; /* Agrega un pequeño efecto al pasar el cursor */
+}
+
+/* Tableros.css */
+
+.editable-list-name {
+  width: 100%;
+  font-size: 1em;
+  font-weight: bold;
+  color: #333;
+  border: none;
+  border-bottom-width: 3px; /* Cambia el grosor cuando está en foco */
+  background-color: transparent;
+  outline: none;
+  padding: 5px;
+  transition: border-color 0.3s ease;
+}
+
+.editable-list-name:focus {
+  border-color: #6a11cb; /* Cambia el color del borde al hacer clic */
+
+}
+
+.list-name {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.list-name:hover {
+  color: #6a11cb; /* Cambia el color al pasar el cursor */
+}
+
+.list-scroll-container {
+  width: 100%; /* Ajusta según el ancho deseado */
+  overflow-x: auto; /* Habilita el desplazamiento horizontal */
+  padding: 10px; /* Espacio alrededor del contenedor */
+}
+
+.list-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.list-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #6a11cb;
+  border-radius: 4px;
+}
+
+.list-scroll-container::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.users-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Alinea los iconos a la derecha */
+  margin-top: 10px;
+  position: absolute; /* Posiciona el contenedor en la esquina derecha */
+  top: 20px; /* Ajusta según sea necesario */
+  right: 125px; /* Ajusta según sea necesario */
+  gap: 5px; /* Espacio entre los iconos */
+}
+
+.users-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgb(49, 49, 141) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.users-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 5.2px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-family: 'Poppins', sans-serif;
+  text-align: center; /* Centra el texto en el campo */
+}
+
+.react-datepicker {
+  font-family: Arial, sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.warning-message {
+  background-color: #ffefc1;
+  color: #856404;
+  padding: 4px;
+  border-radius: 20px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  text-align: center;
+  max-width: 80%; /* Ajusta el ancho máximo del mensaje */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tablero-filtros-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Añade espacio entre los elementos */
+  margin-top: 10px;
+}
+
+.tablero-filtro {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.tablero-filtro label {
+  font-weight: bold;
+  color: #4A4A4A;
+  margin-bottom: 5px;
+}
+.tablero-filtro input {
+  width: 150px;
+}
+
+.tablero-filtro select{
+  padding: 2px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  width: auto; /* Ajusta el ancho */
+  margin-right: 10px; /* Espacio entre la solapa y los filtros */
+}
+
+.tablero-filtro input {
+  padding: 2px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  width: auto; /* Ajusta el ancho */
+  margin-right: 50px; /* Espacio entre la solapa y los filtros */
+}
+
+.tablero-filtro select:hover,
+.tablero-filtro input:hover {
+  border-color: #4a90e2;
+}
+
+.tablero-filtro-container .tablero-solapa {
+  margin-right: 10px; /* Espacio entre la solapa y los filtros */
+}
+
+.tablero-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espacio entre la solapa y los filtros */
+  margin-top: 0px;
+}
+
+.subtarea-detalle-container {
+  padding: 20px;
+  background: #f1f1f1;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 400px;
+}
+
+.subtarea-detalle-container h2 {
+  margin-bottom: 15px;
+}
+
+.estado-dropdown,
+.descripcion-container,
+.persona-asignada-container,
+.fecha-vencimiento-container {
+  margin-bottom: 15px;
+}
+
+.estado-dropdown label,
+.descripcion-container label,
+.persona-asignada-container label,
+.fecha-vencimiento-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.estado-dropdown select,
+.descripcion-container textarea,
+.persona-asignada-container select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 15px;
+  border: 1px solid #ccc;
+}
+
+.descripcion-container textarea {
+  height: 80px;
+  resize: none;
+}
+
+.close-subtarea-modal {
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.descripcion-container textarea {
+  width: 200px; /* Cambia este valor para ajustar el ancho */
+  height: 60px; /* Cambia este valor para ajustar el alto */
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 15px;
+  border: 1px solid #ccc;
+  resize: none; /* Evita que se redimensione */
 }
