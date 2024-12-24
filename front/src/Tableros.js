@@ -34,6 +34,7 @@ const Tableros = () => {
   /*FIN*/
   const maxWords = 50;
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
   const cod_tablero = localStorage.getItem('cod_tablero'); // Obtiene el cod_tablero de LocalStorage
 
   const handleDescripcionChange = (e) => {
@@ -112,6 +113,39 @@ const handleDrop = (targetListIndex) => {
   const handleCloseSubtareaModal = () => {
     setSelectedSubtarea(null);
     setShowSubtareaModal(false);
+  };
+
+  /*MODIFICACION DE NOMBRE DE TARJETA COMIENZA ACA*/
+  const handleNameChange = (e) => {
+    setCardName(e.target.value);
+  };
+
+  const updateCardName = (newName) => {
+    if (!selectedCard) return;
+
+    const updatedLists = [...lists];
+    const { listIndex, cardIndex } = selectedCard;
+
+    if (updatedLists[listIndex]?.cards[cardIndex]) {
+      updatedLists[listIndex].cards[cardIndex].name = newName;
+      setLists(updatedLists); // Actualiza la lista global
+      setSelectedCard({ ...selectedCard, name: newName }); // Actualiza la tarjeta seleccionada
+    } else {
+      console.error('La tarjeta seleccionada no es válida.');
+    }
+  };
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    if (cardName !== selectedCard?.name) {
+      updateCardName(cardName); // Llama a la función para actualizar el nombre
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    }
   };
 
   /*FIN*/
@@ -291,6 +325,11 @@ const handleDrop = (targetListIndex) => {
           <div className="tablero-solapa">
             {title}
           </div>
+          <div className="dashboard-button-container">
+            <button className="dashboard-button" onClick={() => navigate('/dashboard')}>
+              Ir al Dashboard
+            </button>
+          </div>
           <div className="tablero-filtro">
             <label>
               Filtrar por usuario:
@@ -424,7 +463,19 @@ const handleDrop = (targetListIndex) => {
             {/* Botón "X" para cerrar el modal */}
             <button className="close-modal-button" onClick={handleCloseModal}>X</button>
             <div className="tarjeta-cabecera">
-              <h2>{selectedCard?.nom_tarjeta}</h2>  {/* Verifica que 'selectedCard' no sea null o undefined antes de acceder a 'name' */}
+              {isEditing ? (
+                  <input
+                      type="text"
+                      value={cardName}
+                      onChange={handleNameChange}
+                      onBlur={handleBlur}
+                      onKeyPress={handleKeyPress}
+                      autoFocus
+                      className="input-field1"
+                  />
+              ) : (
+                  <h2 onDoubleClick={() => setIsEditing(true)}>{selectedCard?.name || 'Sin Título'}</h2>
+              )}
               <select
                   id="visibility"
                   name="visibility"

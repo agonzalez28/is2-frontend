@@ -5,6 +5,7 @@
   justify-content: space-between;
   background-color: #f8f8f8;
   font-family: 'Poppins', sans-serif;
+  overflow: hidden;
 }
 
 .tableros-header {
@@ -25,17 +26,6 @@
   overflow: hidden;
 }
 
-.tableros-main .list-container.empty .add-list-button {
-  display: block;
-  margin-top: 10px;
-}
-
-.tableros-main .list-container .last-list-button {
-  display: inline-block;
-  margin-left: 10px;
-  margin-top: 10px;
-  align-self: flex-start;
-}
 .list-container {
   display: flex;
   min-height: 100%; /* Asegura que el contenedor tenga un tamaño mínimo */
@@ -144,7 +134,7 @@
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  padding: 0;
+  padding: -1 px;
 }
 
 .options-menu button {
@@ -227,19 +217,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 5px;
-}
-
-.add-list-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.add-list-button i {
-  margin-right: 5px;
 }
 
 .add-list-buttons button {
@@ -801,8 +778,8 @@ select.input-field {
   justify-content: flex-end; /* Alinea los iconos a la derecha */
   margin-top: 10px;
   position: absolute; /* Posiciona el contenedor en la esquina derecha */
-  top: 20px; /* Ajusta según sea necesario */
-  right: 125px; /* Ajusta según sea necesario */
+  top: 12px; /* Ajusta según sea necesario */
+  right: 11px; /* Ajusta según sea necesario */
   gap: 5px; /* Espacio entre los iconos */
 }
 
@@ -973,4 +950,58 @@ select.input-field {
   border-radius: 15px;
   border: 1px solid #ccc;
   resize: none; /* Evita que se redimensione */
+}
+
+.dashboard-button-container {
+  position: absolute; /* Posiciona el botón relativo al contenedor */
+  top: 20px; /* Ajusta la posición vertical */
+  left: 980px; /* Ajusta la posición horizontal */
+}
+
+.dashboard-button {
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.dashboard-button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+}
+
+/* Estilo para el nombre de la tarjeta (h2) */
+.tarjeta-cabecera h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.tarjeta-cabecera h2:hover {
+  color: #787373; /* Cambia el color al pasar el mouse */
+}
+
+.tarjeta-cabecera .input-field1 {
+  font-size: 1rem;
+  padding: 8px 12px;
+  width: 65%;
+  box-sizing: border-box;
+  border: 2px solid #007bff;
+  border-radius: 25px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tarjeta-cabecera .input-field1:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Efecto de sombra */
 }
