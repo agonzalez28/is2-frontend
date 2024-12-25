@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'; 
 import { useParams, useNavigate } from 'react-router-dom';
 import './Tableros.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import Modal from './Modal';
 import axios from 'axios'; // Importa Axios
 
@@ -15,7 +17,7 @@ const Tableros = () => {
   const [selectedCard, setSelectedCard] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [descripcion, setDescripcion] = useState('');
-  const [createdDate, setCreatedDate]  = useState(''); ;
+  const [createdDate, setCreatedDate]  = useState('');
   const [modifiedDate, setModifiedDate] = useState('');
   const [subtareas, setSubtareas] = useState([]);
   const [newSubtarea, setNewSubtarea] = useState('');
@@ -146,6 +148,15 @@ const handleDrop = (targetListIndex) => {
     if (e.key === 'Enter') {
       handleBlur();
     }
+  };
+
+  // Función centralizada para aplicar filtros
+  const aplicarFiltros = (cards, filtros) => {
+    return cards.filter((card) =>
+        Object.keys(filtros).every((key) =>
+            filtros[key] ? card[key] === filtros[key] : true
+        )
+    );
   };
 
   /*FIN*/
@@ -541,9 +552,10 @@ const handleDrop = (targetListIndex) => {
                       !showSubtareaInput && <p>No hay subtareas.</p>
                   )}
                 </div>
+                {/*
                 <button className="add-card-button" onClick={() => handleUpdateCard(selectedCard?.cod_tarjeta)}>
                   <strong> + Actualizar Tarjeta </strong>
-                </button>
+                </button>*/}
               </div>
               <div className="columna-derecha">
                 <div className="detalles">

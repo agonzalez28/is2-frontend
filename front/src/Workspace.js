@@ -21,6 +21,7 @@ const Workspace = ({ onLogout }) => {
     ];
     const cod_usuario = localStorage.getItem('cod_usuario'); // Obtener cod_usuario
     const nombre = localStorage.getItem('nombre'); // Obtener el nombre del usuario
+    const [searchQuery, setSearchQuery] = useState(''); // Estado para el término de búsqueda
 
     useEffect(() => {
         if (!cod_usuario) {
@@ -158,6 +159,15 @@ const Workspace = ({ onLogout }) => {
         }
     };
 
+  /*  const filteredUsers = users.filter(user =>
+        user.nombre.toLowerCase().includes(searchQuery.toLowerCase()) // Filtra usuarios por nombre
+    );
+
+    const displayedUsers = searchQuery
+        ? users.filter(user => user.nombre.toLowerCase().includes(searchQuery.toLowerCase())) // Filtra según la búsqueda
+        : users.filter(user => selectedUsers.includes(user.cod_usuario)); // Muestra los seleccionados si no hay búsqueda
+*/
+
     return (
         <div className="workspace-container">
             <header className="workspace-header">
@@ -220,54 +230,42 @@ const Workspace = ({ onLogout }) => {
                         </div>
                         <div className="form-group">
                             <label htmlFor="boardTitle">Nombre del Workspace</label>
-                            <input 
-                                type="text" 
-                                id="boardTitle" 
-                                name="boardTitle" 
-                                className="input-field" 
+                            <input
+                                type="text"
+                                id="boardTitle"
+                                name="boardTitle"
+                                className="input-field"
                                 onKeyPress={(e) => {
                                     if (e.key === 'Enter') handleCreateBoard(e.target.value, document.getElementById('boardDescription').value);
                                 }}
                             />
                             <label htmlFor="boardDescription">Descripción</label>
-                            <input 
-                                type="text" 
-                                id="boardDescription" 
-                                name="boardDescription" 
-                                className="input-field" 
-                            />
-                            <label htmlFor="visibility">Visibilidad</label>
-                            <select
-                                id="visibility"
-                                name="visibility"
+                            <input
+                                type="text"
+                                id="boardDescription"
+                                name="boardDescription"
                                 className="input-field"
-                                value={visibility}
-                                onChange={(e) => setVisibility(e.target.value)}
-                            >
-                                <option value="Pública">Pública</option>
-                                <option value="Privada">Privada</option>
-                                <option value="Protegida">Protegida</option>
-                            </select>
-
+                            />
                             <label htmlFor="userSelection">Asignar Usuarios</label>
                             <div className="user-selection-container">
                                 <div className=' user-selection'>
                                     {users.map(user => (
-                                    <div key={user.cod_usuario} className="user-selection">
-                                    <input
-                                        type="checkbox"
-                                        id={`user-${user.cod_usuario}`}
-                                        value={user.cod_usuario}
-                                        checked={selectedUsers.includes(user.cod_usuario)} // Verificar si el usuario está seleccionado
-                                        onChange={() => handleUserSelection(user.cod_usuario)} // Cambiar el manejo de selección
-                                    />
-                                     {user.nom_usuario}
+                                        <div key={user.cod_usuario} className="user-selection">
+                                            <input
+                                                type="checkbox"
+                                                id={`user-${user.cod_usuario}`}
+                                                value={user.cod_usuario}
+                                                checked={selectedUsers.includes(user.cod_usuario)} // Verificar si el usuario está seleccionado
+                                                onChange={() => handleUserSelection(user.cod_usuario)} // Cambiar el manejo de selección
+                                            />
+                                            {user.nom_usuario}
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
                             </div>
                         </div>
-                    </div>
-                        <button className="create-board-button" onClick={() => handleCreateBoard(document.getElementById('boardTitle').value, document.getElementById('boardDescription').value)}>
+                        <button className="create-board-button"
+                                onClick={() => handleCreateBoard(document.getElementById('boardTitle').value, document.getElementById('boardDescription').value)}>
                             Crear
                         </button>
                     </div>
