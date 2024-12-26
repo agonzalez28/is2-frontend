@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';  // Importar los estilos
 
-
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -47,23 +46,44 @@ const Login = ({ onLogin }) => {
       setErrorMessage('Ocurrió un error al intentar iniciar sesión.');
     }
   };
-  
-  
 
   useEffect(() => {
+    // Inicializar Google Sign-In
     window.google.accounts.id.initialize({
       client_id: '803348551466-oboa8q0363scjbhe6rp16nakdo999mar.apps.googleusercontent.com',
-      callback: handleGoogleSignIn,
+      callback: handleGoogleSignIn, // Llama a la función de inicio de sesión
     });
+
+    // Renderizar el botón de inicio de sesión
     window.google.accounts.id.renderButton(
-      document.getElementById('google-sign-in-button'),
-      { theme: 'outline', size: 'large' }
+        document.getElementById('google-sign-in-button'),
+        { theme: 'outline', size: 'large' } // Configuración del botón
     );
   }, []);
 
-  const handleGoogleSignIn = (response) => {
-    console.log('Google Sign-In response:', response);
-    // Maneja la respuesta de Google Sign-In aquí
+  const handleGoogleSignIn = async (response) => {
+    const idToken = response.credential; // Obtener el token enviado por Google
+    try {
+      const backendResponse = await fetch('http://localhost:8000/api/google-login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: idToken }),
+      });
+
+      const data = await backendResponse.json();
+      if (backendResponse.ok) {
+        console.log('Login exitoso:', data);
+        localStorage.setItem('authToken', data.authToken); // Maneja la sesión en el frontend
+        onLogin();  // Cambiar el estado de autenticación en App.js
+        navigate('/workspace'); // Redirige al workspace
+      } else {
+        console.error('Error en el login:', data);
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión con Google:', error);
+    }
   };
 
   return (
