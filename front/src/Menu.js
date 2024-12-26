@@ -23,6 +23,7 @@ const Menu = ({ onLogout }) => {
     const cod_usuario = localStorage.getItem('cod_usuario'); // Obtener cod_usuario desde el localStorage
     const cod_espacio = localStorage.getItem('cod_espacio'); // Obtener cod_espacio de localStorage
     
+    
     useEffect(() => {
         // Si no está autenticado, redirige a la página de inicio de sesión
         if (!cod_usuario) {
@@ -97,12 +98,14 @@ const Menu = ({ onLogout }) => {
                     body: JSON.stringify(newBoard),
                 });
 
-                const data = await response.json(); // Captutar respuesta del backend
+                const data = await response.json(); // Capturar respuesta del backend
 
                 if (response.ok) {
                     // Si se creó correctamente, añade el nuevo tablero 
                     setBoards(prevBoards => [...prevBoards, { title: boardTitle, color: randomGradient, id: data.cod_tablero }]);
                     console.log("Tablero creado con éxito! ");
+                    localStorage.setItem('cod_tablero', data.cod_tablero); // Almacena el cod_tablero 
+                    console.log("cod_tablero: ",data.cod_tablero)
                     handleCloseForm(); // Cerrar el formulario
                 } else {
                     // Manejo de errores

@@ -27,15 +27,14 @@ const Tableros = () => {
   const [showSubtareaModal, setShowSubtareaModal] = useState(false);
   const [selectedSubtarea, setSelectedSubtarea] = useState(null);
   const cod_tablero = localStorage.getItem('cod_tablero'); // Obtiene el cod_tablero de LocalStorage
-  console.log("Valor inicial de cod_tablero desde localStorage:", cod_tablero);
-  /*AGREGADO DULCE*/
+  //AGREGADO DULCE
   const [isEditingListName, setIsEditingListName] = useState(false);
   const [editingListIndex, setEditingListIndex] = useState(null);
   const [draggedCard, setDraggedCard] = useState(null); // Estado para la tarjeta arrastrada
   const [personaAsignada, setPersonaAsignada] = useState(''); // Estado para la persona asignada
   const [warningMessage, setWarningMessage] = useState(""); // Estado para el mensaje de advertencia
   const [filtros, setFiltros] = useState({ usuario: '', etiqueta: '' }); // Maneja todos los filtros
-  /*FIN*/
+
   const maxWords = 50;
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
@@ -219,6 +218,41 @@ const handleDrop = (targetListIndex) => {
       textarea.style.height = textarea.scrollHeight + 'px'; 
     }
   }, [descripcion]);
+
+  useEffect(() => {
+    const fetchLists = async () => {
+      if (!cod_tablero) {
+        console.error("No se encontró el código del tablero.");
+        return;
+      }
+      // Verificar en que cod_tablero se estan creando las listas
+      console.log("cod_tablero de listas: ", cod_tablero)
+      try {
+        const response = await fetch(`http://localhost:8000/api/tableros/listas/obtener_listas_tableros/${cod_tablero}/`);
+        if (response.ok) {
+          const data = await response.json();
+          const updatedLists = await Promise.all(data.listas.map(async (lista) => {
+            // Obtener las tarjetas de cada lista
+            const cardsResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/obtener_tarjetas/${lista.cod_lista}/`);
+            const cardsData = await cardsResponse.json();
+            return {
+              cod_lista: lista.cod_lista,
+              name: lista.nom_lista,
+              cards: cardsData.tarjetas || [] 
+            };
+          }));
+  
+          setLists(updatedLists); // Actualiza el estado de las listas con las tarjetas
+        } else {
+          console.error("Error al obtener las listas:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error al obtener las listas:", error);
+      }
+    };
+  
+    fetchLists();
+  }, [cod_tablero]);
 
   const sumarDias = (fecha, dias) => {
     const nuevaFecha = new Date(fecha);
@@ -419,37 +453,6 @@ const handleDrop = (targetListIndex) => {
       alert(error.message);
     }
   };
-
-  useEffect(() => {
-    const fetchLists = async () => {
-      if (!cod_tablero) {
-        console.error("No se encontró el código del tablero.");
-        return;
-      }
-      try {
-        const response = await fetch(`http://localhost:8000/api/tableros/listas/obtener_listas_tableros/${cod_tablero}/`);
-        if (response.ok) {
-          const data = await response.json();
-          const updatedLists = await Promise.all(data.listas.map(async (lista) => {
-            // Obtener las tarjetas de cada lista
-            const cardsResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/obtener_tarjetas/${lista.cod_lista}/`);
-            const cardsData = await cardsResponse.json();
-            return {
-              cod_lista: lista.cod_lista,
-              name: lista.nom_lista,
-              cards: cardsData.tarjetas || []
-            };
-          }));
-          setLists(updatedLists); // Actualiza el estado de las listas con las tarjetas
-        } else {
-          console.error("Error al obtener las listas:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error al obtener las listas:", error);
-      }
-    };
-    fetchLists();
-  }, [cod_tablero]);
 
 
   return (
@@ -681,7 +684,6 @@ const handleDrop = (targetListIndex) => {
               <div className="columna-derecha">
                 <div className="detalles">
                   <h3>Detalles</h3>
-                  /*AGREGADO DULCE*/
                   <div>
                     <p1 htmlFor="personaAsignada">Persona Asignada:</p1>
                     <select
@@ -697,7 +699,7 @@ const handleDrop = (targetListIndex) => {
                       ))}
                     </select>
                   </div>
-                  /*FIN*/
+  
                   <p1>Creado el</p1>
                   <p>{createdDate || 'No disponible'}</p>
                   <p1>Vence el</p1>
