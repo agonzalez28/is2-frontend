@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'; 
 import { useParams, useNavigate } from 'react-router-dom';
-import './Tableros.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import './Tableros.css';
 import Modal from './Modal';
 import axios from 'axios'; // Importa Axios
 
@@ -26,6 +26,8 @@ const Tableros = () => {
   const [etiqueta, setEtiqueta] = useState('');
   const [showSubtareaModal, setShowSubtareaModal] = useState(false);
   const [selectedSubtarea, setSelectedSubtarea] = useState(null);
+  const cod_tablero = localStorage.getItem('cod_tablero'); // Obtiene el cod_tablero de LocalStorage
+  console.log("Valor inicial de cod_tablero desde localStorage:", cod_tablero);
   /*AGREGADO DULCE*/
   const [isEditingListName, setIsEditingListName] = useState(false);
   const [editingListIndex, setEditingListIndex] = useState(null);
@@ -37,7 +39,6 @@ const Tableros = () => {
   const maxWords = 50;
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const cod_tablero = localStorage.getItem('cod_tablero'); // Obtiene el cod_tablero de LocalStorage
 
   const handleDescripcionChange = (e) => {
     const words = e.target.value.split(/\s+/);
@@ -66,6 +67,51 @@ const Tableros = () => {
         .map((n) => n[0])
         .join("");
   }
+
+  const handleAddList = async () => {
+    if (!listName.trim()) {
+      alert("Por favor, ingresa un nombre para la lista.");
+      return;
+    }
+
+    const newList = {
+      nom_lista: listName,
+      cod_tablero: cod_tablero, // Usar cod_tablero obtenido del localStorage
+      cant_tarjetas: 0 // Inicializa con 0 tarjetas
+    };
+    try {
+      const response = await fetch('http://localhost:8000/api/tableros/listas/agregar_lista/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newList),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+
+        // Actualiza la lista localmente después de la respuesta exitosa
+        setLists([
+          ...lists,
+          {
+            cod_lista: data.cod_lista,  // Usando el cod_lista devuelto por el backend
+            name: listName,
+            cards: []
+          }
+        ]);
+        setListName(""); // Limpia el campo de entrada
+        setShowInput(false); // Oculta el campo de entrada
+      } else {
+        console.error("Error al agregar la lista:", response.statusText);
+        alert("Error al agregar la lista");
+      }
+    } catch (error) {
+      console.error("Error al agregar la lista:", error);
+      alert("Error al agregar la lista");
+    }
+  };
+
   /*ESTE NO SE SI YA TENIAN MAS ARRIBA*/
   const handleEditListName = (index) => {
     setEditingListIndex(index);
@@ -161,6 +207,7 @@ const handleDrop = (targetListIndex) => {
 
   /*FIN*/
 
+
   const toggleSubtareaInput = () => {
     setShowSubtareaInput(!showSubtareaInput);
   };
@@ -215,18 +262,19 @@ const handleDrop = (targetListIndex) => {
     }
   };
 
-  const handleDeleteList = async (codLista) => {
-    if (!codLista) {
+  const handleDeleteList = async (cod_lista) => {
+    if (!cod_lista) {
         console.error("codLista es undefined");
         return;
     }
     try {
-        const response = await fetch(`http://localhost:8000/api/tableros/eliminar_lista/${codLista}/`, {
+        const response = await fetch(`http://localhost:8000/api/tableros/listas/eliminar_lista/${cod_lista}/`, {
             method: 'DELETE',
         });
         if (response.ok) {
             console.log("Lista eliminada exitosamente");
             // Aquí puedes actualizar el estado para reflejar la eliminación en la UI
+          setLists(lists.filter((list) => list.cod_lista !== cod_lista));
         } else {
             console.error("Error al eliminar la lista:", response.statusText);
         }
@@ -240,21 +288,55 @@ const handleDrop = (targetListIndex) => {
     setShowOptionsIndex(index === showOptionsIndex ? null : index); 
   };
 
-  const handleAddCard = (index) => {
+  const handleAddCard = async (index) => {
     if (cardName.trim() !== "") {
       const updatedLists = [...lists];
-      updatedLists[index].cards.push({
+
+      // Definir nueva tarjeta para el frontend
+      const newCard = {
         name: cardName,
         subtareas: [],
         etiquetaColor: getRandomGradient(),
-      });
-      
-      const fechaModificada = sumarDias(new Date(), 7);
-      setLists(updatedLists); 
-      setCardName(""); 
-      setShowCardInputIndex(null); 
-      setCreatedDate(getCurrentDate()); 
-      setModifiedDate(fechaModificada.toLocaleString());
+      };
+
+      updatedLists[index].cards.push(newCard);
+
+      // Realiza el POST al backend para agregar la tarjeta
+      try {
+        const response = await fetch('http://localhost:8000/api/tableros/listas/tarjetas/crear_tarjeta/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nom_tarjeta: cardName,
+            cod_lista: updatedLists[index].cod_lista,  // Envía el cod_lista de la lista donde agregarás la tarjeta
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Tarjeta agregada:", data);
+
+          // Actualiza la tarjeta en el estado local con el cod_tarjeta generado
+          updatedLists[index].cards[updatedLists[index].cards.length - 1] = {
+            ...newCard,
+            cod_tarjeta: data.cod_tarjeta,  // Asigna el cod_tarjeta recibido del backend
+          };
+
+          setLists(updatedLists);
+          setCardName("");  // Limpia el campo de nombre de tarjeta
+          setShowCardInputIndex(null);  // Oculta el campo de entrada
+          setCreatedDate(getCurrentDate());  // Establece la fecha de creación
+          setModifiedDate(sumarDias(new Date(), 7).toLocaleString());  // Modifica la fecha de modificación
+        } else {
+          console.error("Error al agregar la tarjeta:", response.statusText);
+          alert("Error al agregar la tarjeta");
+        }
+      } catch (error) {
+        console.error("Error al agregar la tarjeta:", error);
+        alert("Error al agregar la tarjeta");
+      }
     } else {
       alert("El nombre de la tarjeta no puede estar vacío");
     }
@@ -269,7 +351,7 @@ const handleDrop = (targetListIndex) => {
     const selectedCard = lists[listIndex]?.cards[cardIndex]; 
     if (selectedCard) {
       setSelectedCard({ ...selectedCard, listIndex, cardIndex });
-      setSubtareas([...selectedCard.subtareas]);  
+      setSubtareas(Array.isArray(selectedCard.subtareas) ? selectedCard.subtareas : []);
       setShowModal(true);
     } else {
       console.error('No se encontró la tarjeta.');
@@ -306,30 +388,70 @@ const handleDrop = (targetListIndex) => {
     return gradients[randomIndex];
   };
 
-  const handleAddList = async () => {
-    if (!listName) {
-        alert("Por favor, ingresa un nombre para la lista.");
-        return;
-    }    
-    const newList = {
-        nom_lista: listName,
-        cod_tablero: 1,
-        cant_tarjetas: 0 // Inicializa con 0 tarjetas
-    };
-
+  const handleUpdateCard = async (cod_tarjeta) => {
     try {
-        const response = await axios.post('http://localhost:8000/api/tableros/agregar_lista/', newList);
-        console.log(response.data);
-        
-        // Actualiza la lista localmente después de la respuesta exitosa
-        setLists([...lists, { name: listName, cards: [] }]);
-        setListName(""); // Limpia el campo de entrada
-        setShowInput(false); // Oculta el campo de entrada
+      const updatedData = {
+        nom_tarjeta: selectedCard?.name, // O lo que sea necesario actualizar
+        descripcion: descripcion, // O cualquier otro campo
+      };
+
+      // Hacer la solicitud PUT al backend
+      const response = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/actualizar_tarjeta/${cod_tarjeta}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Actualiza el estado del frontend con la respuesta del backend
+        console.log(result);
+        alert("Tarjeta actualizada con éxito.");
+        // Aquí podrías actualizar el estado local o hacer otras acciones necesarias.
+      } else {
+        throw new Error(result.error || 'Hubo un error al actualizar la tarjeta');
+      }
     } catch (error) {
-        console.error("Error al agregar la lista:", error.response.data);
-        alert("Error al agregar la lista: " + error.response.data.error);
+      console.error("Error al actualizar tarjeta:", error);
+      alert(error.message);
     }
-};
+  };
+
+  useEffect(() => {
+    const fetchLists = async () => {
+      if (!cod_tablero) {
+        console.error("No se encontró el código del tablero.");
+        return;
+      }
+      try {
+        const response = await fetch(`http://localhost:8000/api/tableros/listas/obtener_listas_tableros/${cod_tablero}/`);
+        if (response.ok) {
+          const data = await response.json();
+          const updatedLists = await Promise.all(data.listas.map(async (lista) => {
+            // Obtener las tarjetas de cada lista
+            const cardsResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/obtener_tarjetas/${lista.cod_lista}/`);
+            const cardsData = await cardsResponse.json();
+            return {
+              cod_lista: lista.cod_lista,
+              name: lista.nom_lista,
+              cards: cardsData.tarjetas || []
+            };
+          }));
+          setLists(updatedLists); // Actualiza el estado de las listas con las tarjetas
+        } else {
+          console.error("Error al obtener las listas:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error al obtener las listas:", error);
+      }
+    };
+    fetchLists();
+  }, [cod_tablero]);
+
+
   return (
       <div className="tableros-container">
         <div className="tablero-header">
@@ -552,10 +674,9 @@ const handleDrop = (targetListIndex) => {
                       !showSubtareaInput && <p>No hay subtareas.</p>
                   )}
                 </div>
-                {/*
                 <button className="add-card-button" onClick={() => handleUpdateCard(selectedCard?.cod_tarjeta)}>
                   <strong> + Actualizar Tarjeta </strong>
-                </button>*/}
+                </button>
               </div>
               <div className="columna-derecha">
                 <div className="detalles">
