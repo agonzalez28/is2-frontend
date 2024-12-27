@@ -491,3 +491,81 @@ select.input-field {
 .user-selection-container input[type="checkbox"] {
   margin-right: 10px; /* Espaciado entre el checkbox y el nombre */
 }
+
+
+
+
+
+/* Contenedor de seleccionados */
+#selected-container {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+#selected-container strong {
+  font-weight: bold;
+}
+
+/* Contenedor de la lista */
+.list-container {
+  max-height: 300px;
+  margin-left: -40px;
+  overflow-y: auto;
+}
+
+/* Estilo para la lista de elementos */
+#item-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+  gap: 10px;
+  padding-right: 10px; /* Asegura que los elementos no se corten por el scroll */
+}
+
+/* Estilo para cada ítem */
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  margin: 0;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+}
+
+.list-item:hover {
+  background-color: #f1f1f1;
+}
+
+.list-item input[type="checkbox"] {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.list-item label {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.list-item.selected {
+  background-color: #d0e7ff;
+}
+
+.list-item.selected label {
+  font-weight: bold;
+  color: #007BFF;
+}
+
+/* Estilo para elementos seleccionados (al principio de la lista) */
+.list-item.selected input[type="checkbox"] {
+  background-color: #007BFF;
+}
+
+/* Estilo para la lista en caso de que no haya coincidencias */
+#item-list.empty {
+  color: #999;
+  text-align: center;
+  font-size: 14px;
+}

@@ -6,7 +6,7 @@ const Workspace = ({ onLogout }) => {
     const navigate = useNavigate();
     const [showForm, setShowForm] = useState(false);
     const [boards, setBoards] = useState([]);  // Almacena los tableros creados
-    const [users, setUsers] = useState([]); // Almacena la lista de usuarios
+    const [items, setItems] = useState([]); // Almacena la lista de usuarios
     const [selectedUsers, setSelectedUsers] = useState([]); // Estado para usuarios seleccionados
     const maxBoards = 9; // Máximo número de tableros permitidos
     const [errorMessage, setErrorMessage] = useState(""); // Estado para el mensaje de error
@@ -62,7 +62,7 @@ const Workspace = ({ onLogout }) => {
                 descripcion: boardDescription,
                 estado: visibility,
                 cod_usuario: cod_usuario, // Usar cod_usuario del localStorage
-                usuarios: selectedUsers // Usar los usuarios seleccionados
+                cod_usuarios: selectedUsers // Usar los usuarios seleccionados
             };
 
             try {
@@ -88,6 +88,8 @@ const Workspace = ({ onLogout }) => {
                 console.log('cod_espacio:', result.cod_espacio);
 
                 setShowForm(false); // Cerrar el formulario
+
+                setSelectedUsers([]);
             } catch (error) {
                 setErrorMessage(error.message);
             }
@@ -103,7 +105,7 @@ const Workspace = ({ onLogout }) => {
             if (!response.ok) throw new Error('Error al obtener la lista de usuarios');
 
             const usersData = await response.json();
-            setUsers(usersData);
+            setItems(usersData);
         } catch (error) {
             setErrorMessage(error.message);
         }
@@ -121,8 +123,8 @@ const Workspace = ({ onLogout }) => {
         navigate(`/menu/${title}`);
     };
 
-    // Función para manejar la eliminación del workspace
-    const handleDeleteBoard = async (cod_espacio, index) => {
+    // Función para manejar la eliminación del workspace (SE QUITA LA OPCION DE ELIMINACIÓN DE WORKSPACE)
+    /*const handleDeleteBoard = async (cod_espacio, index) => {
         try {
             const response = await fetch(`http://localhost:8000/api/workspace/eliminar/${cod_espacio}/`, {
                 method: 'DELETE',
@@ -140,6 +142,7 @@ const Workspace = ({ onLogout }) => {
             setErrorMessage(error.message);
         }
     };
+    */
 
     const fetchWorkspaces = async () => {
         const cod_usuario = localStorage.getItem('cod_usuario'); // Obtener el código de usuario
@@ -152,22 +155,63 @@ const Workspace = ({ onLogout }) => {
                 title: workspace.nom_proyecto,
                 description: workspace.descripcion, 
                 color: gradients[Math.floor(Math.random() * gradients.length)],
-                cod_espacio: workspace.cod_espacio // Almacena el cod_espacio
+                cod_espacio: workspace.cod_espacio, // Almacena el cod_espacio
+                estado: workspace.estado
             })));
         } catch (error) {
             setErrorMessage(error.message);
         }
     };
 
-  /*  const filteredUsers = users.filter(user =>
-        user.nombre.toLowerCase().includes(searchQuery.toLowerCase()) // Filtra usuarios por nombre
+    const [isFocused, setIsFocused] = useState(false); // Estado para saber si el input está enfocado
+
+    const handleSearchChange = (event) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const handleCheckboxChange = (event) => {
+        const value = parseInt(event.target.value, 10);
+        setSelectedUsers((prevSelected) =>
+            prevSelected.includes(value)
+                ? prevSelected.filter((item) => item !== value)
+                : [...prevSelected, value]
+        );
+    };
+
+    const filteredItems = items.filter((item) =>
+        item.nom_usuario.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const displayedUsers = searchQuery
-        ? users.filter(user => user.nombre.toLowerCase().includes(searchQuery.toLowerCase())) // Filtra según la búsqueda
-        : users.filter(user => selectedUsers.includes(user.cod_usuario)); // Muestra los seleccionados si no hay búsqueda
-*/
+    const handleFocus = () => {
+        setIsFocused(true);
+    };
 
+    const handleBlur = () => {
+        // Al perder el foco no cambiamos el estado, ya que queremos que se sigan mostrando los datos hasta que se haga una búsqueda
+        setIsFocused(false);
+    };
+
+    // Función para ordenar los elementos, poniendo los seleccionados al principio y luego ordenándolos alfabéticamente
+    const sortedItems = (itemsToSort) => {
+        const selected = itemsToSort.filter((item) => selectedUsers.includes(item.nom_usuario));
+        const notSelected = itemsToSort.filter((item) => !selectedUsers.includes(item.nom_usuario));
+
+        // Limitar los elementos no seleccionados a un máximo de 5
+        const limitedNotSelected = notSelected.slice(0, 6);
+
+        // Ordenar tanto los seleccionados como los no seleccionados alfabéticamente
+        const sortedSelected = selected.sort((a, b) => a.nom_usuario.localeCompare(b.value));
+        const sortedNotSelected = limitedNotSelected.sort((a, b) => a.nom_usuario.localeCompare(b.value));
+
+        // Primero los seleccionados, luego el resto limitado y ordenado alfabéticamente
+        return [...sortedSelected, ...sortedNotSelected];
+    };
+
+    const itemsToDisplay = searchQuery ? sortedItems(filteredItems) : sortedItems(items); // Mostrar elementos ordenados
+
+    useEffect(() => {
+        // Aquí podrías actualizar el estado de los seleccionados al iniciar
+    }, []);
     return (
         <div className="workspace-container">
             <header className="workspace-header">
@@ -202,13 +246,12 @@ const Workspace = ({ onLogout }) => {
                     <div className="board-list">
                         {boards.map((board, index) => (
                             <div key={index} className="board" style={{ background: board.color }} onClick={() => handleBoardClick(board.title)}>
-                                <p style={{ color: 'white' }}>{board.title}</p>
-                                <button className="delete-board-button" onClick={(e) => {
-                                    e.stopPropagation(); // Evitar que el clic en el botón active el evento del tablero
-                                    handleDeleteBoard(board.cod_espacio, index); // Pasar el cod_espacio y el índice
-                                }}>
-                                      <span style={{ color: 'white', fontSize: '16px' }}>✖</span> {/* Cambia el icono según tu preferencia */}
-                                </button>
+                                <p style={{ color: 'white' }}>
+                                    {board.title}
+                                    <p style={{ color: 'white', fontSize: '10px', marginTop: '4px'  }}>
+                                        ({board.estado})
+                                    </p>
+                                </p>
                             </div>
                         ))}
                         <div className="board create-new" onClick={() => setShowForm(true)}>
@@ -247,21 +290,36 @@ const Workspace = ({ onLogout }) => {
                                 className="input-field"
                             />
                             <label htmlFor="userSelection">Asignar Usuarios</label>
-                            <div className="user-selection-container">
-                                <div className=' user-selection'>
-                                    {users.map(user => (
-                                        <div key={user.cod_usuario} className="user-selection">
+                            <input
+                                type="text"
+                                id="search-input"
+                                className="input-field"
+                                placeholder="Escribe para filtrar la lista..."
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                onFocus={handleFocus} // Cuando el input está enfocado
+                                onBlur={handleBlur} // Cuando el input pierde el foco
+                            />
+
+                            <div id="selected-container">
+                                <p><strong>Seleccionados:</strong> {selectedUsers.length > 0 ? selectedUsers.join(', ') : 'Ninguno'}</p>
+                            </div>
+
+                            <div className="list-container">
+                                <ul id="item-list">
+                                    {itemsToDisplay.map((item) => (
+                                        <li key={item.cod_usuario} className="list-item">
                                             <input
                                                 type="checkbox"
-                                                id={`user-${user.cod_usuario}`}
-                                                value={user.cod_usuario}
-                                                checked={selectedUsers.includes(user.cod_usuario)} // Verificar si el usuario está seleccionado
-                                                onChange={() => handleUserSelection(user.cod_usuario)} // Cambiar el manejo de selección
+                                                id={item.cod_usuario}
+                                                value={item.cod_usuario}
+                                                checked={selectedUsers.includes(item.cod_usuario)}
+                                                onChange={handleCheckboxChange}
                                             />
-                                            {user.nom_usuario}
-                                        </div>
+                                            <label htmlFor={item.cod_usuario}>{item.nom_usuario}</label>
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
                             </div>
                         </div>
                         <button className="create-board-button"
