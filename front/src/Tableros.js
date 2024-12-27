@@ -224,12 +224,26 @@ const Tableros = () => {
 
   // Función centralizada para aplicar filtros
   const aplicarFiltros = (cards, filtros) => {
-    return cards.filter((card) =>
-        Object.keys(filtros).every((key) =>
-            filtros[key] ? card[key] === filtros[key] : true
-        )
-    );
+    console.log("Filtros aplicados:", filtros);
+    console.log("Tarjetas antes del filtrado:", cards);
+
+    return cards.filter((card) => {
+      const usuarioFiltrado = filtros.usuario
+          ? card.usu_encargado === filtros.usuario
+          : true;
+      const etiquetaFiltrada = filtros.etiqueta
+          ? card.etiqueta === filtros.etiqueta
+          : true;
+
+      console.log(
+          `Comparando tarjeta: ${card.nom_tarjeta}, Usuario: ${card.usu_encargado}, Filtro Usuario: ${filtros.usuario}`
+      );
+
+      return usuarioFiltrado && etiquetaFiltrada;
+    });
   };
+
+
 
   /*FIN*/
 
@@ -482,6 +496,7 @@ const Tableros = () => {
     if (selectedCard) {
       setSelectedCard({ ...selectedCard, listIndex, cardIndex });
       setCardName(selectedCard.nom_tarjeta || ""); // Sincroniza el nombre de la tarjeta
+      setDescripcion(selectedCard.descripcion || ""); // Sincroniza la descripción desde el backend
       setCreatedDate(selectedCard.fec_creacion || "No disponible");
       setSubtareas(Array.isArray(selectedCard.subtareas) ? selectedCard.subtareas : []);
       setShowModal(true);
@@ -545,6 +560,7 @@ const Tableros = () => {
       if (response.ok) {
         // Actualiza el estado del frontend con la respuesta del backend
         console.log(result);
+        updateCardInLists(cod_tarjeta, result);
         alert("Tarjeta actualizada con éxito.");
         // Aquí podrías actualizar el estado local o hacer otras acciones necesarias.
       } else {
