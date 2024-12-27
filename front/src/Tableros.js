@@ -605,6 +605,55 @@ const Tableros = () => {
     }
   };
 
+  const handleEtiquetaChange = (e) => {
+    const nuevaEtiqueta = e.target.value;
+    setEtiqueta(nuevaEtiqueta); // Actualiza el estado de la etiqueta localmente
+
+    // Guarda la etiqueta en sessionStorage
+    const etiquetas = JSON.parse(sessionStorage.getItem('etiquetas')) || {};
+    etiquetas[selectedCard.cod_tarjeta] = nuevaEtiqueta; // Asocia la etiqueta con el ID de la tarjeta
+    sessionStorage.setItem('etiquetas', JSON.stringify(etiquetas));
+  };
+
+  useEffect(() => {
+    const fetchLists = async () => {
+      // Código para obtener listas desde el servidor
+      try {
+        const response = await fetch(`http://localhost:8000/api/tableros/listas/obtener_listas_tableros/${cod_tablero}/`);
+        if (response.ok) {
+          const data = await response.json();
+          const etiquetasGuardadas = JSON.parse(sessionStorage.getItem('etiquetas')) || {};
+
+          const updatedLists = await Promise.all(
+              data.listas.map(async (lista) => {
+                const cardsResponse = await fetch(
+                    `http://localhost:8000/api/tableros/listas/tarjetas/obtener_tarjetas/${lista.cod_lista}/`
+                );
+                const cardsData = await cardsResponse.json();
+
+                return {
+                  cod_lista: lista.cod_lista,
+                  name: lista.nom_lista,
+                  cards: cardsData.tarjetas.map((card) => ({
+                    ...card,
+                    etiqueta: etiquetasGuardadas[card.cod_tarjeta] || card.etiqueta, // Restaura la etiqueta si existe
+                  })),
+                };
+              })
+          );
+
+          setLists(updatedLists);
+        } else {
+          console.error("Error al obtener las listas:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error al obtener las listas:", error);
+      }
+    };
+
+    fetchLists();
+  }, [cod_tablero]);
+
   return (
       <div className="tableros-container">
         <div className="tablero-header">
@@ -866,7 +915,7 @@ const Tableros = () => {
                     <input
                         type="text"
                         value={etiqueta} // Conecta el input con el estado "etiqueta"
-                        onChange={(e) => setEtiqueta(e.target.value)} // Actualiza el estado cuando el usuario escribe
+                        onChange={handleEtiquetaChange} // Actualiza el estado cuando el usuario escribe
                         placeholder="Etiqueta"
                     />
                   </p1>
