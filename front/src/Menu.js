@@ -5,6 +5,9 @@ import './Menu.css'; // Importar los estilos
 const Menu = ({ onLogout }) => {
     const navigate = useNavigate();
     const { title } = useParams(); // Obtener el título del workspace desde la URL
+    const [isEditing, setIsEditing] = useState(false); // Estado para controlar la edición del título
+    const [newTitle, setNewTitle] = useState(title); // Estado para el nuevo título
+    const [originalTitle, setOriginalTitle] = useState(title); // Para almacenar el título original
     const [showForm, setShowForm] = useState(false);
     const [boards, setBoards] = useState([]); // Almacena los tableros creados
     const [boardTitle, setBoardTitle] = useState(""); // Para almacenar el título del tablero
@@ -153,6 +156,94 @@ const Menu = ({ onLogout }) => {
         }
     };
 
+    const handleEditWorkspaceTitle = () => {
+        setOriginalTitle(newTitle); // Guardar el título original antes de editar
+        setIsEditing(true); // Cambiar a modo de edición
+    };
+
+    const handleTitleChange = (e) => {
+        setNewTitle(e.target.value); // Cambiar el valor del título mientras se edita
+    };
+
+    const handleCancelTitle = () => {
+        setNewTitle(originalTitle); // Revertir al título original
+        setIsEditing(false); // Salir del modo de edición
+    };
+
+    const handleUpdateWorkspace = async () => {
+        
+
+        if (newTitle) { // Verificar que tanto el título como la descripción estén definidos
+            const newWorkspace = {
+                nom_proyecto: newTitle,
+                cod_espacio: cod_espacio, // Usar cod_espacio obtenido del localStorage
+            };
+
+            try {
+                const response = await fetch('http://localhost:8000/api/tableros/actualizar/', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newWorkspace),
+                });
+
+                const data = await response.json(); // Capturar respuesta del backend
+
+                if (response.ok) {
+                    // Si se cargó correctamente, actualiza el nombre del tablero
+                    setIsEditing(false); // Guardar el nuevo título y salir del modo de edición
+                    console.log('Nuevo título guardado:', newTitle);
+                } else {
+                    // Manejo de errores
+                    setErrorMessage(data.error || "Error al actualizar el nombre del tablero");
+                }
+            } catch (error) {
+                console.error('Error updating board:', error);
+                setErrorMessage("Error en la conexión con el servidor");
+            }
+        } else {
+            setErrorMessage("El título es obligatorio."); // Agregar manejo de error si no están completos
+        }
+    };
+
+    const [showOptions, setShowOptions] = useState(false); // Estado para controlar la visibilidad de las opciones
+
+    // Función para alternar la visibilidad de las opciones
+    const toggleOptions = () => {
+        setShowOptions(!showOptions);
+    };
+
+    const handleUnableBoard = async () => {
+        
+        const newBoard = {
+            cod_espacio: cod_espacio,
+            estado: 'Inactivo' // Usar cod_espacio obtenido del localStorage
+        };
+
+        try {
+            const response = await fetch('http://localhost:8000/api/tableros/actualizar/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newBoard),
+            });
+
+            const data = await response.json(); // Capturar respuesta del backend
+
+            if (response.ok) {
+                console.log('Inactivacion de estado de workspace');
+            } else {
+                // Manejo de errores
+                setErrorMessage(data.error || "Error al inactivar estado de workspace");
+            }
+        } catch (error) {
+            console.error('Error updating workspace:', error);
+            setErrorMessage("Error en la conexión con el servidor");
+        }
+    };
+
     return (
         <div className="menu-container">
             <header className="menu-header">
@@ -169,7 +260,52 @@ const Menu = ({ onLogout }) => {
                 </div>
             </header>
             <main className="menu-main">
-                <h2 className="workspace-title">{title}</h2>
+                <h2 className="workspace-title">
+                    {isEditing ? (
+                    <>
+                        <input
+                            type="text"
+                            className="workspace-title-edit"
+                            value={newTitle}
+                            onChange={handleTitleChange}
+                            autoFocus
+                            style={{ textAlign: 'center'}}
+                        />
+                        <button className="save-btn" onClick={handleUpdateWorkspace}>
+                            <i className="fas fa-check"></i> {/* Ícono de check */}
+                        </button>
+                        <button className="cancel-btn" onClick={handleCancelTitle}>
+                            <i className="fas fa-times"></i> {/* Ícono de X */}
+                        </button>
+                    </>
+                    ) : (
+                        <span>{newTitle}</span>
+                    )}
+                    <button 
+                        className="edit-title-btn" 
+                        onClick={handleEditWorkspaceTitle}
+                        title="Cambiar nombre de espacio de trabajo"
+                    >
+                        {!isEditing && <i className="fas fa-pencil-alt"></i>} {/* Mostrar ícono de lápiz solo cuando no está en modo de edición */}
+                    </button>
+                </h2>
+                <div className="board-actions">
+                    <div className="more-options" onClick={toggleOptions}>
+                            <i className="fas fa-ellipsis-v"></i> {/* Ícono de tres puntos */}
+                        </div>
+
+                        {/* Mostrar el botón "Inactivar espacio" si showOptions es true */}
+                        {showOptions && (
+                            <div className="board-action">
+                                <button
+                                    className="deactivate-board-button"
+                                    onClick={handleUnableBoard}
+                                >
+                                    Inactivar espacio
+                                </button>
+                            </div>
+                        )}
+        </div>
                 {errorMessage && (
                     <div className="error-message">
                         <span>{errorMessage}</span>
