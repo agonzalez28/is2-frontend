@@ -505,6 +505,16 @@ const Tableros = () => {
       setPersonaAsignada(selectedCard.usu_encargado || ""); // Sincroniza la persona asignada
       setCreatedDate(selectedCard.fec_creacion || "No disponible");
       setSubtareas(Array.isArray(selectedCard.subtareas) ? selectedCard.subtareas : []);
+
+      // Validación: Verifica si la fecha de vencimiento ya pasó
+      if (selectedCard.fec_vencimiento) {
+        const vencimiento = new Date(selectedCard.fec_vencimiento);
+        const hoy = new Date();
+
+        if (vencimiento < hoy) {
+          alert("La fecha de vencimiento de esta tarjeta ya ha pasado.");
+        }
+      }
       setShowModal(true);
     } else {
       console.error('No se encontró la tarjeta.');
