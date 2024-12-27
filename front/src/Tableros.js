@@ -22,7 +22,7 @@ const Tableros = () => {
   const [subtareas, setSubtareas] = useState([]);
   const [newSubtarea, setNewSubtarea] = useState('');
   const [showSubtareaInput, setShowSubtareaInput] = useState(false);
-  const [visibility, setVisibility] = useState('Pendiente');
+  const [estado, setestado] = useState('Pendiente');
   const [etiqueta, setEtiqueta] = useState('');
   const [showSubtareaModal, setShowSubtareaModal] = useState(false);
   const [selectedSubtarea, setSelectedSubtarea] = useState(null);
@@ -89,7 +89,7 @@ const Tableros = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+        console.log("Respuesta del backend al crear subtarea:", data);
 
         // Actualiza la lista localmente después de la respuesta exitosa
         setLists([
@@ -271,7 +271,7 @@ const Tableros = () => {
 
               console.log("Tareas obtenidas para la tarjeta:", tasksData);
 
-              return { ...card, subtareas: tasksData.subtareas || [] }; // Asigna las tareas a la tarjeta
+              return { ...card, subtareas: tasksData.tareas || [] }; // Asigna las tareas a la tarjeta
             }));
             return {
               cod_lista: lista.cod_lista,
@@ -329,6 +329,7 @@ const Tableros = () => {
 
 
   const handleAddSubtarea = async () => {
+
     if (newSubtarea.trim() !== '' && selectedCard) {
       try {
         const response = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/tareas/crear_tarea/`, {
@@ -338,7 +339,7 @@ const Tableros = () => {
           },
           body: JSON.stringify({
             descripcion: newSubtarea,
-            estado: 'En_Curso',
+            estado: 'Abierto',
             cod_tarjeta: selectedCard.cod_tarjeta,
             fec_vencimiento: "2024-12-31",
           }),
@@ -348,6 +349,9 @@ const Tableros = () => {
           const data = await response.json();
           const updatedLists = [...lists];
           const { listIndex, cardIndex } = selectedCard;
+          if (!updatedLists[listIndex].cards[cardIndex].subtareas) {
+            updatedLists[listIndex].cards[cardIndex].subtareas = [];
+          }
           updatedLists[listIndex].cards[cardIndex].subtareas.push(data);
           setLists(updatedLists);
           setNewSubtarea('');
@@ -357,6 +361,8 @@ const Tableros = () => {
       } catch (error) {
         console.error('Error en la conexión:', error);
       }
+    } else {
+      alert('Escribe una descripción para la subtarea.');
     }
   };
 
@@ -438,6 +444,32 @@ const Tableros = () => {
       }
     } else {
       alert("El nombre de la tarjeta no puede estar vacío");
+    }
+  };
+
+  const updateCardState = async (codTarjeta, newState) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/actualizar_tarjeta/${codTarjeta}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          estado: newState, // Envía el nuevo estado
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Estado de la tarjeta actualizado:", data);
+
+        // Actualiza el estado en el frontend
+        updateCardInLists(codTarjeta, data);
+      } else {
+        console.error("Error al actualizar el estado de la tarjeta:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error al actualizar el estado de la tarjeta:", error);
     }
   };
 
@@ -679,15 +711,20 @@ const Tableros = () => {
                   <h2 onDoubleClick={() => setIsEditing(true)}>{cardName  || 'Sin Título'}</h2>
               )}
               <select
-                  id="visibility"
-                  name="visibility"
-                  className={`input-field ${visibility.toLowerCase().replace(' ', '-')}`} // Generar la clase dinámica
-                  value={visibility}
-                  onChange={(e) => setVisibility(e.target.value)}
+                  id="estado"
+                  name="estado"
+                  className={`input-field ${selectedCard?.estado?.toLowerCase() || 'default-class'}`}
+                  value={selectedCard?.estado || "P"}
+                  onChange={async (e) => {
+                    const newState = e.target.value;
+                    await updateCardState(selectedCard.cod_tarjeta, newState);
+                    setSelectedCard({ ...selectedCard, estado: newState }); // Actualiza localmente el estado de la tarjeta
+                    updateCardInLists(selectedCard.cod_tarjeta, { estado: newState });
+                  }}
               >
-                <option value="Pendiente">Pendiente</option>
-                <option value="En   Curso">En Curso</option>
-                <option value="Finalizado">Finalizado</option>
+                <option value="P">Pendiente</option>
+                <option value="E">En Curso</option>
+                <option value="F">Finalizado</option>
               </select>
             </div>
             <div className="tarjeta-contenido">
@@ -727,21 +764,18 @@ const Tableros = () => {
                   {subtareas.length > 0 ? (
                       <ul>
                         {subtareas.map((subtarea, index) => (
-                            <li key={index}
-                                onClick={() => handleSubtareaClick(subtarea)}> {/* Al hacer clic, abre el modal */}
-                              <span>{subtarea.text}</span>
-                              <span
-                                  className={`estado-boton ${subtarea.estado.toLowerCase()}`} // Agrega una clase dinámica según el estado
-                              >
-                        {subtarea.estado}
-                      </span>
+                            <li key={index} onClick={() => handleSubtareaClick(subtarea)}>
+                              <span>{subtarea.descripcion || 'Sin descripción'}</span>
+                              <span className={`estado-boton ${subtarea.estado?.toLowerCase() || 'default-class'}`}>
+                                {subtarea.estado || 'Sin estado'}
+                              </span>
                             </li>
                         ))}
                       </ul>
                   ) : (
-                      // Si no hay subtareas y no se está mostrando el input, muestra el mensaje
                       !showSubtareaInput && <p>No hay subtareas.</p>
                   )}
+
                 </div>
                 <button className="add-card-button" onClick={() => handleUpdateCard(selectedCard?.cod_tarjeta)}>
                   <strong> + Actualizar Tarjeta </strong>
@@ -792,73 +826,65 @@ const Tableros = () => {
         </Modal>
         <Modal show={showSubtareaModal} onClose={handleCloseSubtareaModal}>
           <div className="subtarea-detalle-container">
-            <h2>{selectedSubtarea?.text || "Sin título"}</h2>
-            {/* Dropdown para estado */}
-            <div className="estado-dropdown">
-              <label htmlFor="estado">Estado:</label>
-              <select
-                  id="estado"
-                  value={selectedSubtarea?.estado || "Pendiente"}
-                  onChange={(e) =>
-                      setSelectedSubtarea({ ...selectedSubtarea, estado: e.target.value })
-                  }
-              >
-                <option value="Pendiente">Pendiente</option>
-                <option value="En Curso">En Curso</option>
-                <option value="Finalizado">Finalizado</option>
-              </select>
-            </div>
-            {/* Caja de texto editable para descripción */}
-            <div className="descripcion-container">
-              <label htmlFor="descripcion">Descripción:</label>
-              <textarea
-                  id="descripcion"
-                  value={selectedSubtarea?.descripcion || ""}
-                  onChange={(e) =>
-                      setSelectedSubtarea({ ...selectedSubtarea, descripcion: e.target.value })
-                  }
-                  placeholder="Escribe una descripción..."
-              />
-            </div>
-            {/* Lista desplegable para persona asignada */}
-            <div className="persona-asignada-container">
-              <label htmlFor="personaAsignada">Persona Asignada:</label>
-              <select
-                  id="personaAsignada"
-                  value={selectedSubtarea?.persona || ""}
-                  onChange={(e) =>
-                      setSelectedSubtarea({ ...selectedSubtarea, persona: e.target.value })
-                  }
-              >
-                <option value="">Selecciona un usuario</option>
-                {workspace.usuarios.map((usuario, index) => (
-                    <option key={index} value={usuario.nombre}>
-                      {usuario.nombre}
-                    </option>
-                ))}
-              </select>
-            </div>
-            {/* Selector de fecha ajustable */}
-            <div className="fecha-vencimiento-container">
-              <label htmlFor="fechaVencimiento">Vence el:</label>
-              <DatePicker
-                  id="fechaVencimiento"
-                  selected={
-                    selectedSubtarea?.fechaVencimiento
-                        ? new Date(selectedSubtarea.fechaVencimiento)
-                        : sumarDias(new Date(), 7)
-                  }
-                  onChange={(date) =>
-                      setSelectedSubtarea({
-                        ...selectedSubtarea,
-                        fechaVencimiento: date.toISOString(),
-                      })
-                  }
-                  dateFormat="dd/MM/yyyy HH:mm:ss"
-                  showTimeSelect
-                  timeFormat="HH:mm:ss"
-              />
-            </div>
+            {/* Contenedor principal con diseño de columnas */}
+              {/* Columna Izquierda */}
+              <div className="columna-izquierda1">
+                <h2>{selectedSubtarea?.descripcion || "Sin título"}</h2>
+                <div className="fecha-vencimiento-container">
+                  <label htmlFor="fechaVencimiento">Vence el:</label>
+                  <DatePicker
+                      id="fechaVencimiento"
+                      selected={
+                        selectedSubtarea?.fechaVencimiento
+                            ? new Date(selectedSubtarea.fechaVencimiento)
+                            : sumarDias(new Date(), 7)
+                      }
+                      onChange={(date) =>
+                          setSelectedSubtarea({
+                            ...selectedSubtarea,
+                            fechaVencimiento: date.toISOString(),
+                          })
+                      }
+                      dateFormat="dd/MM/yyyy HH:mm:ss"
+                      showTimeSelect
+                      timeFormat="HH:mm:ss"
+                  />
+                </div>
+              </div>
+
+              {/* Columna Derecha */}
+              <div className="columna-derecha1">
+                <div className="estado-dropdown">
+                  <label htmlFor="estado">Estado:</label>
+                  <select
+                      id="estado"
+                      value={selectedSubtarea?.estado || "Pendiente"}
+                      onChange={(e) =>
+                          setSelectedSubtarea({ ...selectedSubtarea, estado: e.target.value })
+                      }
+                  >
+                    <option value="Abierto">Abierto</option>
+                    <option value="Cerrado">Cerrado</option>
+                  </select>
+                </div>
+                <div className="persona-asignada-container">
+                  <label htmlFor="personaAsignada">Persona Asignada:</label>
+                  <select
+                      id="personaAsignada"
+                      value={selectedSubtarea?.persona || ""}
+                      onChange={(e) =>
+                          setSelectedSubtarea({ ...selectedSubtarea, persona: e.target.value })
+                      }
+                  >
+                    <option value="">Selecciona un usuario</option>
+                    {workspace.usuarios.map((usuario, index) => (
+                        <option key={index} value={usuario.nombre}>
+                          {usuario.nombre}
+                        </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             {/* Botón para cerrar */}
             <button onClick={handleCloseSubtareaModal} className="close-subtarea-modal">
               Cerrar

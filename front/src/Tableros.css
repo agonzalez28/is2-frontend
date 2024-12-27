@@ -438,7 +438,7 @@
 }
 
 .columna-derecha {
-  flex-grow: 1;
+  flex-grow: 0;
   margin-left: 10px; /* Espacio entre la columna izquierda y derecha */
   margin-right: 75px; /* Espacio entre la columna izquierda y derecha */
   max-width: 200px; /* Ajusta el ancho máximo de la columna derecha (Detalles) */
@@ -662,20 +662,27 @@ select.input-field {
 }
 
 /* Colores dinámicos según el estado */
-.input-field.pendiente {
+.input-field.p {
   background-color: #eeb15d; /* Naranja para Pendiente */
   color: white;
 }
 
-.input-field.en-curso {
+.input-field.e {
   background-color: #5476d3; /* Azul para En Curso */
   color: white;
 }
 
-.input-field.finalizado {
+.input-field.f {
   background-color: #5cb85c; /* Verde para Finalizado */
   color: white;
 }
+
+.input-field.default {
+  background-color: #ccc; /* Color por defecto */
+  color: black;
+}
+
+
 
 /* Controlar el color del texto en el dropdown */
 .input-field option {
@@ -887,13 +894,6 @@ select.input-field {
   margin-top: 0px;
 }
 
-.subtarea-detalle-container {
-  padding: 20px;
-  background: #f1f1f1;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 400px;
-}
 
 .subtarea-detalle-container h2 {
   margin-bottom: 15px;
@@ -1005,3 +1005,44 @@ select.input-field {
   border-color: #0056b3;
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Efecto de sombra */
 }
+
+.subtarea-detalle-container {
+  display: flex;
+  flex-direction: column; /* Cambia a columna para alinear elementos verticalmente */
+  justify-content: space-between;
+  padding: 20px;
+  background: #f1f1f1;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 600px; /* Ajusta según el tamaño deseado */
+  margin: auto;
+}
+
+.columna-izquierda1,
+.columna-derecha1 {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espaciado entre elementos dentro de la columna */
+}
+
+.subtarea-detalle-columnas {
+  display: flex;
+  justify-content: space-between; /* Coloca columnas lado a lado */
+  gap: 20px; /* Espaciado entre columnas */
+}
+
+.close-subtarea-modal {
+  align-self: center; /* Centra el botón horizontalmente */
+  background: linear-gradient(90deg, #0a0c1d 0%, #2d4b8b 100%);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  width: 150px; /* Ajusta el ancho del botón */
+  text-align: center;
+}
+
+
+
