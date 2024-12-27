@@ -34,11 +34,9 @@ const Tableros = () => {
   const [personaAsignada, setPersonaAsignada] = useState(''); // Estado para la persona asignada
   const [warningMessage, setWarningMessage] = useState(""); // Estado para el mensaje de advertencia
   const [filtros, setFiltros] = useState({ usuario: '', etiqueta: '' }); // Maneja todos los filtros
-
   const maxWords = 50;
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-
 
   const handleDescripcionChange = (e) => {
     const words = e.target.value.split(/\s+/);
@@ -57,7 +55,8 @@ const Tableros = () => {
     usuarios: [
       { nombre: "AGONZALEZ", avatar: null }, // Avatar puede ser null para usar iniciales
       { nombre: "DALVAREM", avatar: null },
-      // Agrega más usuarios aquí
+      { nombre: "BAZUAGA", avatar: null },
+      { nombre: "AMARTINEZ", avatar: null },
     ]
   });
 
@@ -432,7 +431,7 @@ const Tableros = () => {
           setLists(updatedLists);
           setCardName("");  // Limpia el campo de nombre de tarjeta
           setShowCardInputIndex(null);  // Oculta el campo de entrada
-          setCreatedDate(getCurrentDate());  // Establece la fecha de creación
+         // setCreatedDate(getCurrentDate());  // Establece la fecha de creación
           setModifiedDate(sumarDias(new Date(), 7).toLocaleString());  // Modifica la fecha de modificación
         } else {
           console.error("Error al agregar la tarjeta:", response.statusText);
@@ -483,6 +482,7 @@ const Tableros = () => {
     if (selectedCard) {
       setSelectedCard({ ...selectedCard, listIndex, cardIndex });
       setCardName(selectedCard.nom_tarjeta || ""); // Sincroniza el nombre de la tarjeta
+      setCreatedDate(selectedCard.fec_creacion || "No disponible");
       setSubtareas(Array.isArray(selectedCard.subtareas) ? selectedCard.subtareas : []);
       setShowModal(true);
     } else {
@@ -525,6 +525,10 @@ const Tableros = () => {
       const updatedData = {
         nom_tarjeta: selectedCard?.name, // O lo que sea necesario actualizar
         descripcion: descripcion, // O cualquier otro campo
+        usu_encargado: personaAsignada, // Persona asignada
+        fec_vencimiento: modifiedDate instanceof Date
+            ? modifiedDate.toISOString().split('T')[0] // Convierte la fecha al formato YYYY-MM-DD
+            : null,
       };
 
       // Hacer la solicitud PUT al backend
@@ -551,7 +555,6 @@ const Tableros = () => {
       alert(error.message);
     }
   };
-
 
   return (
       <div className="tableros-container">
@@ -789,7 +792,7 @@ const Tableros = () => {
                     <select
                         id="personaAsignada"
                         value={personaAsignada}
-                        onChange={handlePersonaAsignadaChange}
+                        onChange={(e) => setPersonaAsignada(e.target.value)}
                     >
                       <option value="">Seleccione una persona...</option>
                       {workspace.usuarios.map((usuario, index) => (
@@ -804,12 +807,11 @@ const Tableros = () => {
                   <p>{createdDate || 'No disponible'}</p>
                   <p1>Vence el</p1>
                   <DatePicker
+                      id="fechaVencimiento"
                       selected={modifiedDate instanceof Date ? modifiedDate : new Date()}
                       onChange={(date) => setModifiedDate(date instanceof Date ? date : new Date())}
-                      dateFormat="dd/MM/yyyy HH:mm:ss"
-                      showTimeSelect
-                      timeFormat="HH:mm:ss"
-                      placeholderText="Selecciona una fecha y hora"
+                      dateFormat="yyyy-MM-dd"
+                      placeholderText="Selecciona una fecha"
                   />
                   <p1>Añadir Etiqueta
                     <input
