@@ -235,10 +235,21 @@ const handleDrop = (targetListIndex) => {
             // Obtener las tarjetas de cada lista
             const cardsResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/obtener_tarjetas/${lista.cod_lista}/`);
             const cardsData = await cardsResponse.json();
+
+             // Obtener las tareas para cada tarjeta de la lista
+              const updatedCards = await Promise.all(cardsData.tarjetas.map(async (card) => {
+                const tasksResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/tareas/obtener_tarea/${card.cod_tarjeta}/`);
+                const tasksData = await tasksResponse.json();
+
+                console.log("Tareas obtenidas para la tarjeta:", tasksData);
+
+                return { ...card, subtareas: tasksData.subtareas || [] }; // Asigna las tareas a la tarjeta
+              }));
             return {
               cod_lista: lista.cod_lista,
               name: lista.nom_lista,
-              cards: cardsData.tarjetas || [] 
+             // cards: cardsData.tarjetas || [] 
+             cards: updatedCards, // Tarjetas con tareas
             };
           }));
   
@@ -277,24 +288,39 @@ const handleDrop = (targetListIndex) => {
     navigate('/menu');  
   };
 
-  const handleAddSubtarea = () => {
+
+  const handleAddSubtarea = async () => {
     if (newSubtarea.trim() !== '' && selectedCard) {
-      const updatedLists = [...lists];
-      const { listIndex, cardIndex } = selectedCard;
-  
-      if (updatedLists[listIndex] && updatedLists[listIndex].cards[cardIndex]) {
-        updatedLists[listIndex].cards[cardIndex].subtareas.push({
-          text: newSubtarea,
-          estado: 'En_Curso'
+      try {
+        const response = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/tareas/crear_tarea/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            descripcion: newSubtarea,
+            estado: 'En_Curso',
+            cod_tarjeta: selectedCard.cod_tarjeta,
+            fec_vencimiento: "2024-12-31",
+          }),
         });
-        setLists(updatedLists);
-        setSubtareas([...updatedLists[listIndex].cards[cardIndex].subtareas]);
-        setNewSubtarea('');
-      } else {
-        console.error('La tarjeta seleccionada no es válida.');
+
+        if (response.ok) {
+          const data = await response.json();
+          const updatedLists = [...lists];
+          const { listIndex, cardIndex } = selectedCard;
+          updatedLists[listIndex].cards[cardIndex].subtareas.push(data);
+          setLists(updatedLists);
+          setNewSubtarea('');
+        } else {
+          console.error('Error al crear la tarea:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error en la conexión:', error);
       }
     }
   };
+
 
   const handleDeleteList = async (cod_lista) => {
     if (!cod_lista) {
@@ -307,7 +333,7 @@ const handleDrop = (targetListIndex) => {
         });
         if (response.ok) {
             console.log("Lista eliminada exitosamente");
-            // Aquí puedes actualizar el estado para reflejar la eliminación en la UI
+            // Actualiza el estado para reflejar la eliminación en la UI
           setLists(lists.filter((list) => list.cod_lista !== cod_lista));
         } else {
             console.error("Error al eliminar la lista:", response.statusText);
