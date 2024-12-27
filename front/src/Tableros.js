@@ -47,7 +47,12 @@ const Tableros = () => {
 
   /*AGREGADO DULCE*/
   const handlePersonaAsignadaChange = (event) => {
-    setPersonaAsignada(event.target.value); // Actualiza la persona asignada
+    const nuevaPersona = event.target.value;
+    setPersonaAsignada(nuevaPersona);
+
+    if (selectedCard) {
+      setSelectedCard({ ...selectedCard, usu_encargado: nuevaPersona });
+    }
   };
 
   const [workspace, setWorkspace] = useState({
@@ -497,6 +502,7 @@ const Tableros = () => {
       setSelectedCard({ ...selectedCard, listIndex, cardIndex });
       setCardName(selectedCard.nom_tarjeta || ""); // Sincroniza el nombre de la tarjeta
       setDescripcion(selectedCard.descripcion || ""); // Sincroniza la descripción desde el backend
+      setPersonaAsignada(selectedCard.usu_encargado || ""); // Sincroniza la persona asignada
       setCreatedDate(selectedCard.fec_creacion || "No disponible");
       setSubtareas(Array.isArray(selectedCard.subtareas) ? selectedCard.subtareas : []);
       setShowModal(true);
@@ -511,6 +517,7 @@ const Tableros = () => {
       const { listIndex, cardIndex } = selectedCard;
 
       updatedLists[listIndex].cards[cardIndex].etiqueta = etiqueta;
+      updatedLists[listIndex].cards[cardIndex].usu_encargado = selectedCard.usu_encargado;
 
       setLists(updatedLists);
     }
@@ -890,8 +897,15 @@ const Tableros = () => {
                     <select
                         id="personaAsignada"
                         value={personaAsignada}
-                        onChange={(e) => setPersonaAsignada(e.target.value)}
-                    >
+                        onChange={(e) => {
+                          const nuevaPersona = e.target.value;
+                          setPersonaAsignada(nuevaPersona); // Actualiza el estado local
+
+                          // Actualiza también la tarjeta seleccionada (selectedCard)
+                          if (selectedCard) {
+                            setSelectedCard({ ...selectedCard, usu_encargado: nuevaPersona });
+                          }
+                        }}                    >
                       <option value="">Seleccione una persona...</option>
                       {workspace.usuarios.map((usuario, index) => (
                           <option key={index} value={usuario.nombre}>
