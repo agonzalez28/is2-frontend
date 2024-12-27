@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -22,7 +22,7 @@ const Tableros = () => {
   const [subtareas, setSubtareas] = useState([]);
   const [newSubtarea, setNewSubtarea] = useState('');
   const [showSubtareaInput, setShowSubtareaInput] = useState(false);
-  const [visibility, setVisibility] = useState('Finalizado');
+  const [visibility, setVisibility] = useState('Pendiente');
   const [etiqueta, setEtiqueta] = useState('');
   const [showSubtareaModal, setShowSubtareaModal] = useState(false);
   const [selectedSubtarea, setSelectedSubtarea] = useState(null);
@@ -38,6 +38,7 @@ const Tableros = () => {
   const maxWords = 50;
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+
 
   const handleDescripcionChange = (e) => {
     const words = e.target.value.split(/\s+/);
@@ -127,30 +128,30 @@ const Tableros = () => {
   };
 
 // Función para iniciar el arrastre de una tarjeta
-const handleDragStart = (listIndex, cardIndex) => {
-  setDraggedCard({ listIndex, cardIndex });
-};
+  const handleDragStart = (listIndex, cardIndex) => {
+    setDraggedCard({ listIndex, cardIndex });
+  };
 
 // Función para soltar la tarjeta en una lista de destino
   const handleDragOver = (event) => {
     event.preventDefault(); // Necesario para permitir el drop
   };
 
-const handleDrop = (targetListIndex) => {
-  if (!draggedCard) return;
+  const handleDrop = (targetListIndex) => {
+    if (!draggedCard) return;
 
-  const { listIndex, cardIndex } = draggedCard;
-  const updatedLists = [...lists];
+    const { listIndex, cardIndex } = draggedCard;
+    const updatedLists = [...lists];
 
-  // Remueve la tarjeta de la lista original
-  const [movedCard] = updatedLists[listIndex].cards.splice(cardIndex, 1);
+    // Remueve la tarjeta de la lista original
+    const [movedCard] = updatedLists[listIndex].cards.splice(cardIndex, 1);
 
-  // Agrega la tarjeta a la lista de destino
-  updatedLists[targetListIndex].cards.push(movedCard);
+    // Agrega la tarjeta a la lista de destino
+    updatedLists[targetListIndex].cards.push(movedCard);
 
-  setLists(updatedLists);
-  setDraggedCard(null);
-};
+    setLists(updatedLists);
+    setDraggedCard(null);
+  };
 
   // Función para actualizar los filtros
   const handleFiltroChange = (key, value) => {
@@ -186,6 +187,8 @@ const handleDrop = (targetListIndex) => {
     setIsEditing(false);
     if (cardName !== selectedCard?.name) {
       updateCardName(cardName); // Llama a la función para actualizar el nombre
+      saveCardNameToBackend(selectedCard.codTarjeta, cardName); // Guarda en el backend
+     /* setSelectedCard({ ...selectedCard, nom_tarjeta: cardName });*/
     }
   };
 
@@ -194,6 +197,31 @@ const handleDrop = (targetListIndex) => {
       handleBlur();
     }
   };
+
+  const saveCardNameToBackend = async (codTarjeta, newName) => {
+    try {
+      const response = await fetch(`/api/tarjetas/${codTarjeta}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nom_tarjeta: newName, // Aquí envías solo el campo que se editó
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al actualizar la tarjeta en el backend");
+      }
+
+      const data = await response.json();
+      console.log("Tarjeta actualizada en el backend:", data);
+      updateCardInLists(codTarjeta, data);
+    } catch (error) {
+      console.error("Error al guardar el nombre de la tarjeta:", error);
+    }
+  };
+
 
   // Función centralizada para aplicar filtros
   const aplicarFiltros = (cards, filtros) => {
@@ -210,12 +238,12 @@ const handleDrop = (targetListIndex) => {
   const toggleSubtareaInput = () => {
     setShowSubtareaInput(!showSubtareaInput);
   };
-  
+
   useEffect(() => {
     const textarea = document.querySelector('.descripcion-textarea');
     if (textarea) {
-      textarea.style.height = 'auto'; 
-      textarea.style.height = textarea.scrollHeight + 'px'; 
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
     }
   }, [descripcion]);
 
@@ -236,23 +264,23 @@ const handleDrop = (targetListIndex) => {
             const cardsResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/obtener_tarjetas/${lista.cod_lista}/`);
             const cardsData = await cardsResponse.json();
 
-             // Obtener las tareas para cada tarjeta de la lista
-              const updatedCards = await Promise.all(cardsData.tarjetas.map(async (card) => {
-                const tasksResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/tareas/obtener_tarea/${card.cod_tarjeta}/`);
-                const tasksData = await tasksResponse.json();
+            // Obtener las tareas para cada tarjeta de la lista
+            const updatedCards = await Promise.all(cardsData.tarjetas.map(async (card) => {
+              const tasksResponse = await fetch(`http://localhost:8000/api/tableros/listas/tarjetas/tareas/obtener_tarea/${card.cod_tarjeta}/`);
+              const tasksData = await tasksResponse.json();
 
-                console.log("Tareas obtenidas para la tarjeta:", tasksData);
+              console.log("Tareas obtenidas para la tarjeta:", tasksData);
 
-                return { ...card, subtareas: tasksData.subtareas || [] }; // Asigna las tareas a la tarjeta
-              }));
+              return { ...card, subtareas: tasksData.subtareas || [] }; // Asigna las tareas a la tarjeta
+            }));
             return {
               cod_lista: lista.cod_lista,
               name: lista.nom_lista,
-             // cards: cardsData.tarjetas || [] 
-             cards: updatedCards, // Tarjetas con tareas
+              // cards: cardsData.tarjetas || []
+              cards: updatedCards, // Tarjetas con tareas
             };
           }));
-  
+
           setLists(updatedLists); // Actualiza el estado de las listas con las tarjetas
         } else {
           console.error("Error al obtener las listas:", response.statusText);
@@ -261,22 +289,33 @@ const handleDrop = (targetListIndex) => {
         console.error("Error al obtener las listas:", error);
       }
     };
-  
+
     fetchLists();
   }, [cod_tablero]);
+
+  const updateCardInLists = (codTarjeta, updatedCard) => {
+    const updatedLists = lists.map((list) => ({
+      ...list,
+      cards: list.cards.map((card) =>
+          card.cod_tarjeta === codTarjeta ? { ...card, ...updatedCard } : card
+      ),
+    }));
+    setLists(updatedLists);
+  };
+
 
   const sumarDias = (fecha, dias) => {
     const nuevaFecha = new Date(fecha);
     nuevaFecha.setDate(nuevaFecha.getDate() + dias);
     return nuevaFecha;
-  };  
+  };
 
   const getCurrentDate = () => {
     const date = new Date();
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    
+
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
@@ -285,7 +324,7 @@ const handleDrop = (targetListIndex) => {
   };
 
   const handleGoToMenu = () => {
-    navigate('/menu');  
+    navigate('/menu');
   };
 
 
@@ -324,28 +363,28 @@ const handleDrop = (targetListIndex) => {
 
   const handleDeleteList = async (cod_lista) => {
     if (!cod_lista) {
-        console.error("codLista es undefined");
-        return;
+      console.error("codLista es undefined");
+      return;
     }
     try {
-        const response = await fetch(`http://localhost:8000/api/tableros/listas/eliminar_lista/${cod_lista}/`, {
-            method: 'DELETE',
-        });
-        if (response.ok) {
-            console.log("Lista eliminada exitosamente");
-            // Actualiza el estado para reflejar la eliminación en la UI
-          setLists(lists.filter((list) => list.cod_lista !== cod_lista));
-        } else {
-            console.error("Error al eliminar la lista:", response.statusText);
-        }
+      const response = await fetch(`http://localhost:8000/api/tableros/listas/eliminar_lista/${cod_lista}/`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        console.log("Lista eliminada exitosamente");
+        // Actualiza el estado para reflejar la eliminación en la UI
+        setLists(lists.filter((list) => list.cod_lista !== cod_lista));
+      } else {
+        console.error("Error al eliminar la lista:", response.statusText);
+      }
     } catch (error) {
-        console.error("Error al eliminar la lista:", error);
+      console.error("Error al eliminar la lista:", error);
     }
-};
+  };
 
 
   const toggleOptions = (index) => {
-    setShowOptionsIndex(index === showOptionsIndex ? null : index); 
+    setShowOptionsIndex(index === showOptionsIndex ? null : index);
   };
 
   const handleAddCard = async (index) => {
@@ -401,16 +440,17 @@ const handleDrop = (targetListIndex) => {
       alert("El nombre de la tarjeta no puede estar vacío");
     }
   };
-  
+
   const handleSubtareaClick = (subtarea) => {
     setSelectedSubtarea(subtarea);
     setShowSubtareaModal(true);
-  };  
+  };
 
   const handleCardClick = (listIndex, cardIndex) => {
-    const selectedCard = lists[listIndex]?.cards[cardIndex]; 
+    const selectedCard = lists[listIndex]?.cards[cardIndex];
     if (selectedCard) {
       setSelectedCard({ ...selectedCard, listIndex, cardIndex });
+      setCardName(selectedCard.nom_tarjeta || ""); // Sincroniza el nombre de la tarjeta
       setSubtareas(Array.isArray(selectedCard.subtareas) ? selectedCard.subtareas : []);
       setShowModal(true);
     } else {
@@ -422,9 +462,9 @@ const handleDrop = (targetListIndex) => {
     if (selectedCard) {
       const updatedLists = [...lists];
       const { listIndex, cardIndex } = selectedCard;
-  
+
       updatedLists[listIndex].cards[cardIndex].etiqueta = etiqueta;
-  
+
       setLists(updatedLists);
     }
     setShowModal(false);
@@ -443,7 +483,7 @@ const handleDrop = (targetListIndex) => {
       'linear-gradient(135deg, #D9AFD9 0%, #97D9E1 100%)',
       'linear-gradient(135deg, #F3A4E9 0%, #5190EB 100%)'
     ];
-    
+
     const randomIndex = Math.floor(Math.random() * gradients.length);
     return gradients[randomIndex];
   };
@@ -533,72 +573,72 @@ const handleDrop = (targetListIndex) => {
           <div className="list-scroll-container">
             <div className={`list-container ${lists.length === 0 ? 'no-lists' : ''}`}>
               {lists.map((list, index) => (
-                    <div
-                        key={index}
-                        className="list"
-                        onDragOver={handleDragOver}
-                        onDrop={() => handleDrop(index)} // Maneja el drop en esta lista
-                    >
-                      {isEditingListName && editingListIndex === index ? (
-                          <input
-                              type="text"
-                              value={listName}
-                              onChange={(e) => setListName(e.target.value)}
-                              onBlur={() => handleSaveListName(index)}
-                              autoFocus
-                              className="editable-list-name"
-                              placeholder={lists[index].name}
-                          />
-                      ) : (
-                          <h3 onClick={() => handleEditListName(index)} className="list-name">{list.name}</h3>
-                      )}
-                      <div className="options-menu-container">
-                        <button className="options-button" onClick={() => toggleOptions(index)}>
-                          <i className="fas fa-ellipsis-h"></i>
-                        </button>
-                        {showOptionsIndex === index && (
-                            <div className="options-menu">
-                              <button onClick={() => handleDeleteList(list.cod_lista)}>Eliminar</button>
-                            </div>
-                        )}
-                      </div>
-                      <div className="cards-container">
-                        {aplicarFiltros(list.cards, filtros).map((card, cardIndex) => (
-                            <div key={cardIndex} className="card" draggable onDragStart={() => handleDragStart(index, cardIndex)} onClick={() => handleCardClick(index, cardIndex)}>
-                              {card.etiqueta && (
-                                  <div className="etiqueta"
-                                       style={{background: card.etiquetaColor || 'linear-gradient(135deg, #B993D6 0%, #8CA6DB 100%)'}}>
-                                    {card.etiqueta}
-                                  </div>
-                              )}
-                              {card.nom_tarjeta} {/* Accede a la propiedad 'name' del objeto 'card' */}
-                            </div>
-                        ))}
-                      </div>
-                      {showCardInputIndex === index ? (
-                          <div className="add-card-form">
-                            <input
-                                type="text"
-                                value={cardName}
-                                onChange={(e) => setCardName(e.target.value)}
-                            />
-                            <div className="add-card-buttons">
-                              <button className="add-card-button" onClick={() => handleAddCard(index)}>Añadir tarjeta
-                              </button>
-                              <button className="close-button" onClick={() => setShowCardInputIndex(null)}>X</button>
-                            </div>
+                  <div
+                      key={index}
+                      className="list"
+                      onDragOver={handleDragOver}
+                      onDrop={() => handleDrop(index)} // Maneja el drop en esta lista
+                  >
+                    {isEditingListName && editingListIndex === index ? (
+                        <input
+                            type="text"
+                            value={listName}
+                            onChange={(e) => setListName(e.target.value)}
+                            onBlur={() => handleSaveListName(index)}
+                            autoFocus
+                            className="editable-list-name"
+                            placeholder={lists[index].name}
+                        />
+                    ) : (
+                        <h3 onClick={() => handleEditListName(index)} className="list-name">{list.name}</h3>
+                    )}
+                    <div className="options-menu-container">
+                      <button className="options-button" onClick={() => toggleOptions(index)}>
+                        <i className="fas fa-ellipsis-h"></i>
+                      </button>
+                      {showOptionsIndex === index && (
+                          <div className="options-menu">
+                            <button onClick={() => handleDeleteList(list.cod_lista)}>Eliminar</button>
                           </div>
-                      ) : (
-                          <button className="add-card-button" onClick={() => setShowCardInputIndex(index)}>
-                            <strong> + Añadir una tarjeta </strong>
-                          </button>
                       )}
                     </div>
-                    ))}
-                    <div className={`add-list ${lists.length === 0 ? 'first-list' : ''}`}>
-                      {!showInput && (
-                          <button onClick={() => setShowInput(true)}>
-                            <i className="fas fa-plus"></i> Añade otra lista
+                    <div className="cards-container">
+                      {aplicarFiltros(list.cards, filtros).map((card, cardIndex) => (
+                          <div key={cardIndex} className="card" draggable onDragStart={() => handleDragStart(index, cardIndex)} onClick={() => handleCardClick(index, cardIndex)}>
+                            {card.etiqueta && (
+                                <div className="etiqueta"
+                                     style={{background: card.etiquetaColor || 'linear-gradient(135deg, #B993D6 0%, #8CA6DB 100%)'}}>
+                                  {card.etiqueta}
+                                </div>
+                            )}
+                            {card.nom_tarjeta} {/* Accede a la propiedad 'name' del objeto 'card' */}
+                          </div>
+                      ))}
+                    </div>
+                    {showCardInputIndex === index ? (
+                        <div className="add-card-form">
+                          <input
+                              type="text"
+                              value={cardName}
+                              onChange={(e) => setCardName(e.target.value)}
+                          />
+                          <div className="add-card-buttons">
+                            <button className="add-card-button" onClick={() => handleAddCard(index)}>Añadir tarjeta
+                            </button>
+                            <button className="close-button" onClick={() => setShowCardInputIndex(null)}>X</button>
+                          </div>
+                        </div>
+                    ) : (
+                        <button className="add-card-button" onClick={() => setShowCardInputIndex(index)}>
+                          <strong> + Añadir una tarjeta </strong>
+                        </button>
+                    )}
+                  </div>
+              ))}
+              <div className={`add-list ${lists.length === 0 ? 'first-list' : ''}`}>
+                {!showInput && (
+                    <button onClick={() => setShowInput(true)}>
+                      <i className="fas fa-plus"></i> Añade otra lista
                     </button>
                 )}
                 {showInput && (
@@ -636,7 +676,7 @@ const handleDrop = (targetListIndex) => {
                       className="input-field1"
                   />
               ) : (
-                  <h2 onDoubleClick={() => setIsEditing(true)}>{selectedCard?.name || 'Sin Título'}</h2>
+                  <h2 onDoubleClick={() => setIsEditing(true)}>{cardName  || 'Sin Título'}</h2>
               )}
               <select
                   id="visibility"
@@ -725,7 +765,7 @@ const handleDrop = (targetListIndex) => {
                       ))}
                     </select>
                   </div>
-  
+
                   <p1>Creado el</p1>
                   <p>{createdDate || 'No disponible'}</p>
                   <p1>Vence el</p1>
@@ -750,81 +790,81 @@ const handleDrop = (targetListIndex) => {
             </div>
           </div>
         </Modal>
-              <Modal show={showSubtareaModal} onClose={handleCloseSubtareaModal}>
-                <div className="subtarea-detalle-container">
-                  <h2>{selectedSubtarea?.text || "Sin título"}</h2>
-                  {/* Dropdown para estado */}
-                  <div className="estado-dropdown">
-                    <label htmlFor="estado">Estado:</label>
-                    <select
-                        id="estado"
-                        value={selectedSubtarea?.estado || "Pendiente"}
-                        onChange={(e) =>
-                            setSelectedSubtarea({ ...selectedSubtarea, estado: e.target.value })
-                        }
-                    >
-                      <option value="Pendiente">Pendiente</option>
-                      <option value="En Curso">En Curso</option>
-                      <option value="Finalizado">Finalizado</option>
-                    </select>
-                  </div>
-                  {/* Caja de texto editable para descripción */}
-                  <div className="descripcion-container">
-                    <label htmlFor="descripcion">Descripción:</label>
-                    <textarea
-                        id="descripcion"
-                        value={selectedSubtarea?.descripcion || ""}
-                        onChange={(e) =>
-                            setSelectedSubtarea({ ...selectedSubtarea, descripcion: e.target.value })
-                        }
-                        placeholder="Escribe una descripción..."
-                    />
-                  </div>
-                  {/* Lista desplegable para persona asignada */}
-                  <div className="persona-asignada-container">
-                    <label htmlFor="personaAsignada">Persona Asignada:</label>
-                    <select
-                        id="personaAsignada"
-                        value={selectedSubtarea?.persona || ""}
-                        onChange={(e) =>
-                            setSelectedSubtarea({ ...selectedSubtarea, persona: e.target.value })
-                        }
-                    >
-                      <option value="">Selecciona un usuario</option>
-                      {workspace.usuarios.map((usuario, index) => (
-                          <option key={index} value={usuario.nombre}>
-                            {usuario.nombre}
-                          </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* Selector de fecha ajustable */}
-                  <div className="fecha-vencimiento-container">
-                    <label htmlFor="fechaVencimiento">Vence el:</label>
-                    <DatePicker
-                        id="fechaVencimiento"
-                        selected={
-                          selectedSubtarea?.fechaVencimiento
-                              ? new Date(selectedSubtarea.fechaVencimiento)
-                              : sumarDias(new Date(), 7)
-                        }
-                        onChange={(date) =>
-                            setSelectedSubtarea({
-                              ...selectedSubtarea,
-                              fechaVencimiento: date.toISOString(),
-                            })
-                        }
-                        dateFormat="dd/MM/yyyy HH:mm:ss"
-                        showTimeSelect
-                        timeFormat="HH:mm:ss"
-                    />
-                  </div>
-                  {/* Botón para cerrar */}
-                  <button onClick={handleCloseSubtareaModal} className="close-subtarea-modal">
-                    Cerrar
-                  </button>
-                </div>
-              </Modal>
+        <Modal show={showSubtareaModal} onClose={handleCloseSubtareaModal}>
+          <div className="subtarea-detalle-container">
+            <h2>{selectedSubtarea?.text || "Sin título"}</h2>
+            {/* Dropdown para estado */}
+            <div className="estado-dropdown">
+              <label htmlFor="estado">Estado:</label>
+              <select
+                  id="estado"
+                  value={selectedSubtarea?.estado || "Pendiente"}
+                  onChange={(e) =>
+                      setSelectedSubtarea({ ...selectedSubtarea, estado: e.target.value })
+                  }
+              >
+                <option value="Pendiente">Pendiente</option>
+                <option value="En Curso">En Curso</option>
+                <option value="Finalizado">Finalizado</option>
+              </select>
+            </div>
+            {/* Caja de texto editable para descripción */}
+            <div className="descripcion-container">
+              <label htmlFor="descripcion">Descripción:</label>
+              <textarea
+                  id="descripcion"
+                  value={selectedSubtarea?.descripcion || ""}
+                  onChange={(e) =>
+                      setSelectedSubtarea({ ...selectedSubtarea, descripcion: e.target.value })
+                  }
+                  placeholder="Escribe una descripción..."
+              />
+            </div>
+            {/* Lista desplegable para persona asignada */}
+            <div className="persona-asignada-container">
+              <label htmlFor="personaAsignada">Persona Asignada:</label>
+              <select
+                  id="personaAsignada"
+                  value={selectedSubtarea?.persona || ""}
+                  onChange={(e) =>
+                      setSelectedSubtarea({ ...selectedSubtarea, persona: e.target.value })
+                  }
+              >
+                <option value="">Selecciona un usuario</option>
+                {workspace.usuarios.map((usuario, index) => (
+                    <option key={index} value={usuario.nombre}>
+                      {usuario.nombre}
+                    </option>
+                ))}
+              </select>
+            </div>
+            {/* Selector de fecha ajustable */}
+            <div className="fecha-vencimiento-container">
+              <label htmlFor="fechaVencimiento">Vence el:</label>
+              <DatePicker
+                  id="fechaVencimiento"
+                  selected={
+                    selectedSubtarea?.fechaVencimiento
+                        ? new Date(selectedSubtarea.fechaVencimiento)
+                        : sumarDias(new Date(), 7)
+                  }
+                  onChange={(date) =>
+                      setSelectedSubtarea({
+                        ...selectedSubtarea,
+                        fechaVencimiento: date.toISOString(),
+                      })
+                  }
+                  dateFormat="dd/MM/yyyy HH:mm:ss"
+                  showTimeSelect
+                  timeFormat="HH:mm:ss"
+              />
+            </div>
+            {/* Botón para cerrar */}
+            <button onClick={handleCloseSubtareaModal} className="close-subtarea-modal">
+              Cerrar
+            </button>
+          </div>
+        </Modal>
         <footer className="tableros-footer">
           <p>© TaskFlow - 2024</p>
         </footer>
