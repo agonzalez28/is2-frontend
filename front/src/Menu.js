@@ -170,41 +170,60 @@ const Menu = ({ onLogout }) => {
         setIsEditing(false); // Salir del modo de edición
     };
 
-    const handleUpdateWorkspace = async () => {
-        
+    const handleUpdateWorkspace = async (updateType = "title") => {
+        // Crear el objeto de actualización
+        const newWorkspace = {
+            cod_espacio: cod_espacio,
+        };
 
-        if (newTitle) { // Verificar que tanto el título como la descripción estén definidos
-            const newWorkspace = {
-                nom_proyecto: newTitle,
-                cod_espacio: cod_espacio, // Usar cod_espacio obtenido del localStorage
-            };
-
-            try {
-                const response = await fetch('http://localhost:8000/api/tableros/actualizar/', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(newWorkspace),
-                });
-
-                const data = await response.json(); // Capturar respuesta del backend
-
-                if (response.ok) {
-                    // Si se cargó correctamente, actualiza el nombre del tablero
-                    setIsEditing(false); // Guardar el nuevo título y salir del modo de edición
-                    console.log('Nuevo título guardado:', newTitle);
-                } else {
-                    // Manejo de errores
-                    setErrorMessage(data.error || "Error al actualizar el nombre del tablero");
-                }
-            } catch (error) {
-                console.error('Error updating board:', error);
-                setErrorMessage("Error en la conexión con el servidor");
-            }
+        if (updateType === "title" && newTitle) {
+            newWorkspace.nom_proyecto = newTitle; // Actualizar el nombre del proyecto
+        } else if (updateType === "inactivate") {
+            newWorkspace.estado = "Inactivo"; // Cambiar el estado a "Inactivo"
+            newWorkspace.nom_proyecto = 'Inactivo';
         } else {
-            setErrorMessage("El título es obligatorio."); // Agregar manejo de error si no están completos
+            setErrorMessage("Datos insuficientes para la operación."); // Mostrar error si faltan datos
+            return;
         }
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/workspace/actualizar/${cod_espacio}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newWorkspace),
+            });
+
+            const data = await response.json(); // Capturar respuesta del backend
+
+            if (response.ok) {
+                if (updateType === "title") {
+                    // Actualiza el título localmente y sale del modo de edición
+                    setIsEditing(false);
+                    console.log('Nuevo título guardado:', newTitle);
+                    alert("El nombre del workspace se ha actualizado con éxito");
+                } else if (updateType === "inactivate") {
+                    console.log('Workspace inactivado con éxito:', data);
+                    alert("El espacio se ha inactivado con éxito");
+                    // Aquí podrías redirigir o actualizar el estado según sea necesario
+                }
+            } else {
+                // Manejo de errores
+                setErrorMessage(data.error || "Error al actualizar el workspace");
+            }
+        } catch (error) {
+            console.error('Error al actualizar el workspace:', error);
+            setErrorMessage("Error en la conexión con el servidor");
+        }
+    };
+
+    const handleUnableBoard = () => {
+        handleUpdateWorkspace("inactivate");
+    };
+
+    const handleEditName = () => {
+        handleUpdateWorkspace("title");
     };
 
     const [showOptions, setShowOptions] = useState(false); // Estado para controlar la visibilidad de las opciones
@@ -212,36 +231,6 @@ const Menu = ({ onLogout }) => {
     // Función para alternar la visibilidad de las opciones
     const toggleOptions = () => {
         setShowOptions(!showOptions);
-    };
-
-    const handleUnableBoard = async () => {
-        
-        const newBoard = {
-            cod_espacio: cod_espacio,
-            estado: 'Inactivo' // Usar cod_espacio obtenido del localStorage
-        };
-
-        try {
-            const response = await fetch('http://localhost:8000/api/tableros/actualizar/', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newBoard),
-            });
-
-            const data = await response.json(); // Capturar respuesta del backend
-
-            if (response.ok) {
-                console.log('Inactivacion de estado de workspace');
-            } else {
-                // Manejo de errores
-                setErrorMessage(data.error || "Error al inactivar estado de workspace");
-            }
-        } catch (error) {
-            console.error('Error updating workspace:', error);
-            setErrorMessage("Error en la conexión con el servidor");
-        }
     };
 
     return (
@@ -271,7 +260,7 @@ const Menu = ({ onLogout }) => {
                             autoFocus
                             style={{ textAlign: 'center'}}
                         />
-                        <button className="save-btn" onClick={handleUpdateWorkspace}>
+                        <button className="save-btn" onClick={handleEditName}>
                             <i className="fas fa-check"></i> {/* Ícono de check */}
                         </button>
                         <button className="cancel-btn" onClick={handleCancelTitle}>

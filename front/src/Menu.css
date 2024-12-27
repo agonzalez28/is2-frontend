@@ -151,7 +151,7 @@ p {
 /* Estilo del texto del tooltip */
 .tooltiptext {
   visibility: hidden;
-  width: 120px; /* Ajusta el ancho según sea necesario */
+  width: 100px;
   background-color: #666464;
   color: #ffffff;
   text-align: center;
@@ -159,12 +159,11 @@ p {
   padding: 5px;
   position: absolute;
   z-index: 11;
-  bottom: 0%; /* Muestra el texto arriba del ícono */
-  left: 115%;
-  margin-left: -60px; /* Ajusta para centrar el tooltip */
+  top: 50%; /* Centrado vertical respecto al botón */
+  left: auto; /* Aparece al lado derecho del botón */
+  transform: translateY(-50%); /* Centra verticalmente */
   opacity: 0;
   transition: opacity 0.3s;
-  font-size: 0.8rem;
 }
 
 /* Muestra el tooltip al pasar el ratón */
@@ -447,7 +446,23 @@ label {
 .deactivate-board-button:hover {
     background-color: #d32f2f; /* Rojo más oscuro */
 }
-.board-actions{
-  margin-top: -20px;
-  width: 100px;
+
+.board-actions {
+  position: absolute; /* Relativo al contenedor del tablero */
+  top: 311px; /* Ajusta la distancia desde la parte superior del tablero */
+  right: 800px; /* Ajusta la distancia desde el borde derecho del tablero */
+  display: flex; /* Para alinear elementos adicionales si los hay */
+  align-items: center;
+}
+
+
+.more-options {
+  margin-left: 10px; /* Espacio entre el texto y los puntos */
+  cursor: pointer; /* Muestra que es clicable */
+  font-size: 18px; /* Ajusta el tamaño de los puntos */
+}
+
+.more-options i {
+  color: #000; /* Color de los puntos suspensivos */
+  font-size: 18px; /* Ajusta el tamaño */
 }

@@ -10,7 +10,7 @@ const Workspace = ({ onLogout }) => {
     const [selectedUsers, setSelectedUsers] = useState([]); // Estado para usuarios seleccionados
     const maxBoards = 9; // Máximo número de tableros permitidos
     const [errorMessage, setErrorMessage] = useState(""); // Estado para el mensaje de error
-    const [visibility, setVisibility] = useState('Pública'); // Estado para la visibilidad
+    const [visibility, setVisibility] = useState('Activo'); // Estado para la visibilidad
     const gradients = [
         'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)', // Lila a azul
         'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)', // Celeste a azul
