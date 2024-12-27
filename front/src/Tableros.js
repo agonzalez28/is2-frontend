@@ -473,7 +473,7 @@ const Tableros = () => {
   };
 
   const handleSubtareaClick = (subtarea) => {
-    setSelectedSubtarea(subtarea);
+    setSelectedSubtarea({ ...subtarea });
     setShowSubtareaModal(true);
   };
 
@@ -553,6 +553,39 @@ const Tableros = () => {
     } catch (error) {
       console.error("Error al actualizar tarjeta:", error);
       alert(error.message);
+    }
+  };
+
+  const handleSubtareaUpdate = async (updatedFields) => {
+    if (selectedSubtarea) {
+      const updatedSubtarea = { ...selectedSubtarea, ...updatedFields };
+      setSelectedSubtarea(updatedSubtarea);
+
+      try {
+        const response = await fetch(
+            `http://localhost:8000/api/tableros/listas/tarjetas/tareas/actualizar_tarea/${selectedSubtarea.cod_tarea}/`, // Ajusta la URL según tu API
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(updatedSubtarea),
+            }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al actualizar la subtarea");
+        }
+
+        const data = await response.json();
+        console.log("Subtarea actualizada:", data);
+
+        // Actualiza el estado global de las subtareas
+        const updatedSubtareas = subtareas.map((sub) =>
+            sub.id === data.id ? { ...sub, ...updatedFields } : sub
+        );
+        setSubtareas(updatedSubtareas);
+      } catch (error) {
+        console.error("Error al actualizar la subtarea:", error);
+      }
     }
   };
 
@@ -842,9 +875,8 @@ const Tableros = () => {
                             : sumarDias(new Date(), 7)
                       }
                       onChange={(date) =>
-                          setSelectedSubtarea({
-                            ...selectedSubtarea,
-                            fechaVencimiento: date.toISOString(),
+                          handleSubtareaUpdate({
+                            fechaVencimiento: date.toISOString().split("T")[0], // Formato YYYY-MM-DD
                           })
                       }
                       dateFormat="dd/MM/yyyy HH:mm:ss"
@@ -861,29 +893,10 @@ const Tableros = () => {
                   <select
                       id="estado"
                       value={selectedSubtarea?.estado || "Pendiente"}
-                      onChange={(e) =>
-                          setSelectedSubtarea({ ...selectedSubtarea, estado: e.target.value })
-                      }
+                      onChange={(e) => handleSubtareaUpdate({ estado: e.target.value })}
                   >
                     <option value="Abierto">Abierto</option>
                     <option value="Cerrado">Cerrado</option>
-                  </select>
-                </div>
-                <div className="persona-asignada-container">
-                  <label htmlFor="personaAsignada">Persona Asignada:</label>
-                  <select
-                      id="personaAsignada"
-                      value={selectedSubtarea?.persona || ""}
-                      onChange={(e) =>
-                          setSelectedSubtarea({ ...selectedSubtarea, persona: e.target.value })
-                      }
-                  >
-                    <option value="">Selecciona un usuario</option>
-                    {workspace.usuarios.map((usuario, index) => (
-                        <option key={index} value={usuario.nombre}>
-                          {usuario.nombre}
-                        </option>
-                    ))}
                   </select>
                 </div>
               </div>
